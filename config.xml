@@ -50,6 +50,7 @@
                 android:largeHeap="true"
                 android:requestLegacyExternalStorage="true"
                 android:usesCleartextTraffic="true"
+                android:allowBackup="false"
                 android:enableOnBackInvokedCallback="false" />
         </edit-config>
 
