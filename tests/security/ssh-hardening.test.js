@@ -29,6 +29,14 @@ describe("SSH security invariants (source-level regression checks)", () => {
     expect(nativeBridge).toContain("enforceTrustedNativeCaller(");
   });
 
+  it("revokes plugin capability tokens when the WebView resets", () => {
+    const tee = read("src/plugins/pluginContext/src/android/Tee.java");
+    const reset = tee.slice(tee.indexOf("public void onReset()"), tee.indexOf("public boolean execute("));
+    expect(reset).toContain("sessionId = null");
+    expect(reset).toContain("tokenStore.clear()");
+    expect(reset).toContain("permissionStore.clear()");
+  });
+
   it("fails closed when encrypted SSH profile storage cannot initialize", () => {
     const store = read("src/plugins/sftp/src/com/foxdebug/sftp/SftpSecurityStore.java");
     const encryption = read("src/plugins/auth/src/android/EncryptedPreferenceManager.java");
