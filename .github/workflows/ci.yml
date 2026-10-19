@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - security/ssh-native-hardening
   pull_request:
     branches:
       - '**'
@@ -45,7 +46,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/security/ssh-native-hardening'
     steps:
       - name: Checkout Repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
