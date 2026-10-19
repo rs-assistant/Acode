@@ -9,8 +9,24 @@ describe("SSH security invariants (source-level regression checks)", () => {
     const rules = read("res/android/xml/data_extraction_rules.xml");
     expect(config).toMatch(/android:allowBackup="false"/);
     expect(config).toMatch(/android:dataExtractionRules="@xml\/data_extraction_rules"/);
-    expect(rules).toMatch(/<cloud-backup>[\\s\\S]*?<exclude domain="root" path="\."\s*\/>[\\s\\S]*?<\/cloud-backup>/);
-    expect(rules).toMatch(/<device-transfer>[\\s\\S]*?<exclude domain="root" path="\."\s*\/>[\\s\\S]*?<\/device-transfer>/);
+    expect(rules).toMatch(/<cloud-backup>[\s\S]*?<exclude domain="root" path="\."\s*\/>[\s\S]*?<\/cloud-backup>/);
+    expect(rules).toMatch(/<device-transfer>[\s\S]*?<exclude domain="root" path="\."\s*\/>[\s\S]*?<\/device-transfer>/);
+  });
+
+  it("blocks release until native saved-profile authorization is implemented", () => {
+    // Intentional red security gate: a method allowlist is NOT caller authorization.
+    // Replace this source-level check with adversarial Android tests once a
+    // genuinely isolated native caller-authentication boundary is implemented.
+    const sftp = read("src/plugins/sftp/src/com/foxdebug/sftp/Sftp.java");
+    const nativeBridge = sftp.slice(sftp.indexOf("public boolean execute("));
+    const connect = nativeBridge.indexOf('case "connectUsingProfile":');
+    const shell = nativeBridge.indexOf('case "openShellUsingProfile":');
+    expect(connect).toBeGreaterThan(-1);
+    expect(shell).toBeGreaterThan(-1);
+    // Current bridge exposes these operations without native caller authorization.
+    // This assertion MUST fail until an independently authenticated native
+    // authorization check is wired into dispatch and covered by device tests.
+    expect(nativeBridge).toContain("enforceTrustedNativeCaller(");
   });
 
   it("fails closed when encrypted SSH profile storage cannot initialize", () => {
