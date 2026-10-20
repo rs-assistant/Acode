@@ -558,11 +558,17 @@ public class Sftp extends CordovaPlugin {
         profile.getString("privateKey"),
         Base64.NO_WRAP
       );
-      SshKeyPair keyPair = SshKeyUtils.getPrivateKey(
-        new ByteArrayInputStream(privateKey),
-        profile.optString("passphrase")
-      );
-      builder.withIdentities(keyPair);
+      try {
+        SshKeyPair keyPair = SshKeyUtils.getPrivateKey(
+          new ByteArrayInputStream(privateKey),
+          profile.optString("passphrase")
+        );
+        builder.withIdentities(keyPair);
+      } finally {
+        // Avoid retaining an extra decoded copy after the SSH library
+        // has parsed the key (including when parsing fails).
+        java.util.Arrays.fill(privateKey, (byte) 0);
+      }
     } else {
       builder.withPassword(profile.optString("password"));
     }
