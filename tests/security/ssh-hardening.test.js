@@ -54,6 +54,16 @@ describe("SSH security invariants (source-level regression checks)", () => {
     expect(encryption).toContain('throw new IllegalStateException("Encrypted preferences are unavailable", e)');
   });
 
+  it("clears the temporary decoded SSH private-key buffer even on parse failure", () => {
+    const sftp = read("src/plugins/sftp/src/com/foxdebug/sftp/Sftp.java");
+    const begin = sftp.indexOf("private SshClientBuilder buildProfileBuilder(\n    JSONObject profile,");
+    const end = sftp.indexOf("private byte[] readUri(", begin);
+    const builder = sftp.slice(begin, end);
+    expect(builder).toContain("try {");
+    expect(builder).toContain("finally {");
+    expect(builder).toContain("java.util.Arrays.fill(privateKey, (byte) 0)");
+  });
+
   it("does not silently trust unknown or changed SSH host keys", () => {
     const sftp = read("src/plugins/sftp/src/com/foxdebug/sftp/Sftp.java");
     expect(sftp).toContain("sshContext.setHostKeyVerification(");
