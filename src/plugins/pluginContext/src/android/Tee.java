@@ -100,7 +100,7 @@ public class Tee extends CordovaPlugin {
             }
 
             EncryptedPreferenceManager prefs =
-                    new EncryptedPreferenceManager(context, pluginId);
+                    new EncryptedPreferenceManager(context, pluginId, false);
 
             String value = prefs.getString(key, defaultValue);
             callback.success(value);
@@ -120,7 +120,7 @@ public class Tee extends CordovaPlugin {
             }
 
             EncryptedPreferenceManager prefs =
-                    new EncryptedPreferenceManager(context, pluginId);
+                    new EncryptedPreferenceManager(context, pluginId, false);
 
             prefs.setString(key, value);
             callback.success();
@@ -139,7 +139,7 @@ public class Tee extends CordovaPlugin {
             }
 
             EncryptedPreferenceManager prefs =
-                    new EncryptedPreferenceManager(context, pluginId);
+                    new EncryptedPreferenceManager(context, pluginId, false);
 
             prefs.remove(key);
             callback.success();
@@ -157,7 +157,7 @@ public class Tee extends CordovaPlugin {
             }
 
             EncryptedPreferenceManager prefs =
-                    new EncryptedPreferenceManager(context, pluginId);
+                    new EncryptedPreferenceManager(context, pluginId, false);
 
             prefs.clear();
             callback.success();
