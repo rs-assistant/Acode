@@ -38,6 +38,13 @@ describe("SSH security invariants (source-level regression checks)", () => {
     expect(handler.indexOf("permissions.getString(i)")).toBeLessThan(handler.indexOf("permissionStore.put(token, permissionList)"));
   });
 
+  it("does not fall back to plaintext storage for plugin secrets", () => {
+    const tee = read("src/plugins/pluginContext/src/android/Tee.java");
+    const secretStoreCalls = tee.match(/new EncryptedPreferenceManager\\(context, pluginId(?:, false)?\\)/g) ?? [];
+    expect(secretStoreCalls).toHaveLength(4);
+    expect(secretStoreCalls.every((call) => call.endsWith(", false)"))).toBe(true);
+  });
+
   it("revokes plugin capability tokens when the WebView resets", () => {
     const tee = read("src/plugins/pluginContext/src/android/Tee.java");
     const reset = tee.slice(tee.indexOf("public void onReset()"), tee.indexOf("public boolean execute("));
