@@ -29,6 +29,15 @@ describe("SSH security invariants (source-level regression checks)", () => {
     expect(nativeBridge).toContain("enforceTrustedNativeCaller(");
   });
 
+  it("validates plugin manifest before issuing a token", () => {
+    const tee = read("src/plugins/pluginContext/src/android/Tee.java");
+    const start = tee.indexOf("private synchronized void handleTokenRequest(");
+    const end = tee.indexOf("private static String generateSecret()", start);
+    const handler = tee.slice(start, end);
+    expect(handler.indexOf("new JSONObject(pluginJson)")).toBeLessThan(handler.indexOf("tokenStore.put(pluginId, token)"));
+    expect(handler.indexOf("permissions.getString(i)")).toBeLessThan(handler.indexOf("permissionStore.put(token, permissionList)"));
+  });
+
   it("revokes plugin capability tokens when the WebView resets", () => {
     const tee = read("src/plugins/pluginContext/src/android/Tee.java");
     const reset = tee.slice(tee.indexOf("public void onReset()"), tee.indexOf("public boolean execute("));
