@@ -266,13 +266,8 @@ public class Tee extends CordovaPlugin {
             CallbackContext callback
     ) {
 
-        String token = tokenStore.get(pluginId);
-
-        if (token == null) {
-            token = generateSecret();
-            tokenStore.put(pluginId, token);
-        }
-
+        // Parse and validate first. A malformed manifest must never mint a
+        // capability token or change permissions for an existing token.
         try {
             JSONObject json = new JSONObject(pluginJson);
             JSONArray permissions = json.optJSONArray("permissions");
@@ -285,15 +280,19 @@ public class Tee extends CordovaPlugin {
                 }
             }
 
-            // Bind permissions to token
+            // Update both stores only after validation has succeeded.
+            String token = tokenStore.get(pluginId);
+            if (token == null) {
+                token = generateSecret();
+                tokenStore.put(pluginId, token);
+            }
             permissionStore.put(token, permissionList);
-
+            callback.success(token);
         } catch (JSONException e) {
             callback.error("INVALID_PLUGIN_JSON");
             return;
         }
 
-        callback.success(token);
     }
 
     /**
