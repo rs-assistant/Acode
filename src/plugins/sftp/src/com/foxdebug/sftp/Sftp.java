@@ -79,6 +79,7 @@ public class Sftp extends CordovaPlugin {
   private static final long MIN_CONNECT_TIMEOUT_MS = 1000L;
   private static final long MAX_CONNECT_TIMEOUT_MS = 30000L;
   private static boolean cryptoProviderConfigured;
+  private SshIdentityStore identityStore;
   private final Object connectionLock = new Object();
   private final Map<String, ConnectionAttempt> connectionAttempts =
     new ConcurrentHashMap<>();
@@ -325,6 +326,7 @@ public class Sftp extends CordovaPlugin {
     context = cordova.getContext();
     activity = cordova.getActivity();
     securityStore = new SftpSecurityStore(context);
+    identityStore = new SshIdentityStore(context);
     System.setProperty("maverick.log.nothread", "true");
     configureCryptoProvider();
   }
@@ -549,21 +551,23 @@ public class Sftp extends CordovaPlugin {
   }
 
   private SshClientBuilder buildProfileBuilder(JSONObject profile)
-    throws IOException, InvalidPassphraseException, JSONException {
+    throws Exception {
     return buildProfileBuilder(profile, DEFAULT_CONNECT_TIMEOUT_MS);
   }
 
   private SshClientBuilder buildProfileBuilder(
     JSONObject profile,
     long connectTimeout
-  ) throws IOException, InvalidPassphraseException, JSONException {
+  ) throws Exception {
     SshClientBuilder builder = SshClientBuilder.create()
       .withHostname(profile.getString("hostname"))
       .withPort(profile.optInt("port", 22))
       .withConnectTimeout(connectTimeout)
       .withUsername(profile.getString("username"));
 
-    if ("key".equals(profile.optString("authType"))) {
+    if ("identity".equals(profile.optString("authType"))) {
+      builder.withIdentities(identityStore.loadKeyPair(profile.getString("identityId")));
+    } else if ("key".equals(profile.optString("authType"))) {
       byte[] privateKey = Base64.decode(
         profile.getString("privateKey"),
         Base64.NO_WRAP
@@ -731,6 +735,9 @@ public class Sftp extends CordovaPlugin {
                 return;
               }
               String authType = args.optString(4, "password");
+              if (!"password".equals(authType) && !"key".equals(authType)) {
+                throw new IllegalArgumentException("Unsupported legacy authentication type");
+              }
               JSONObject profile = new JSONObject();
               profile.put("hostname", args.getString(1));
               profile.put("port", args.optInt(2, 22));
@@ -770,6 +777,9 @@ public class Sftp extends CordovaPlugin {
               int port = args.optInt(2, 22);
               String username = args.getString(3).trim();
               String authType = args.optString(4, "password");
+              if (!"password".equals(authType) && !"key".equals(authType) && !"identity".equals(authType)) {
+                throw new IllegalArgumentException("Unsupported authentication type");
+              }
               if (hostname.isEmpty()) {
                 throw new IllegalArgumentException("Hostname is required");
               }
@@ -787,7 +797,11 @@ public class Sftp extends CordovaPlugin {
               profile.put("port", port);
               profile.put("username", username);
               profile.put("authType", authType);
-              if ("key".equals(authType)) {
+              if ("identity".equals(authType)) {
+                String identityId = args.optString(8);
+                identityStore.getPublic(identityId); // Reject missing/deleted IDs without exporting a secret.
+                profile.put("identityId", identityId);
+              } else if ("key".equals(authType)) {
                 String keyFile = args.optString(6);
                 if (!keyFile.isEmpty()) {
                   profile.put(
@@ -861,7 +875,43 @@ public class Sftp extends CordovaPlugin {
     info.put("port", profile.optInt("port", 22));
     info.put("username", profile.getString("username"));
     info.put("authType", profile.optString("authType", "password"));
+    info.put("identityId", profile.optString("identityId"));
     return info;
+  }
+
+  public void listSshKeys(JSONArray args, CallbackContext callback) {
+    cordova.getThreadPool().execute(() -> {
+      try { callback.success(identityStore.listPublic()); }
+      catch (Exception error) { callback.error("Could not read SSH key metadata"); }
+    });
+  }
+
+  public void generateSshKey(JSONArray args, CallbackContext callback) {
+    cordova.getThreadPool().execute(() -> {
+      try { callback.success(identityStore.generate(args.optString(0), args.optString(1))); }
+      catch (Exception error) { callback.error("Could not securely generate SSH key (Ed25519 or RSA-4096, name 1–80 characters, maximum 32 keys)"); }
+    });
+  }
+
+  public void deleteSshKey(JSONArray args, CallbackContext callback) {
+    final String id = args.optString(0);
+    if (!SshIdentityStore.validId(id) || activity == null || activity.isFinishing()) {
+      callback.error("SSH key is unavailable");
+      return;
+    }
+    activity.runOnUiThread(() -> {
+      AlertDialog confirmation = securityDialogBuilder()
+        .setTitle("Delete local SSH private key?")
+        .setMessage("Profiles using this key will stop connecting. Already authenticated sessions and copies of the public key on servers are NOT revoked. Disconnect and remove the server public key separately if you need revocation.")
+        .setNegativeButton("Cancel", (ignored, which) -> callback.success(0))
+        .setPositiveButton("Delete", (ignored, which) -> cordova.getThreadPool().execute(() -> {
+          try { identityStore.delete(id); callback.success(1); }
+          catch (Exception error) { callback.error("Could not securely delete SSH key"); }
+        }))
+        .create();
+      confirmation.setOnCancelListener(ignored -> callback.success(0));
+      confirmation.show();
+    });
   }
 
   private static String nullableProfileID(JSONArray args) {
@@ -993,6 +1043,9 @@ public class Sftp extends CordovaPlugin {
       case "saveProfile":
       case "editProfile":
       case "getProfileInfo":
+      case "listSshKeys":
+      case "generateSshKey":
+      case "deleteSshKey":
       case "deleteProfile":
       case "getFile":
       case "putFile":

@@ -24,6 +24,29 @@ import {
 } from "lib/sftpProfiles";
 
 describe("SFTP secure profiles", () => {
+	it("binds a stored identity using only an opaque ID, without password or private key", async () => {
+		const editProfileWithIdentity = vi.fn((...args) =>
+			args.at(-2)({ profileId: "profile-native" }),
+		);
+		globalThis.sftp = { editProfileWithIdentity };
+		await editSftpProfile({
+			hostname: "dummy.example",
+			username: "dummy",
+			authType: "identity",
+			identityId: "identity-dummy",
+			password: "must-not-forward",
+			keyFile: "must-not-forward",
+		});
+		expect(editProfileWithIdentity).toHaveBeenCalledWith(
+			null,
+			"dummy.example",
+			22,
+			"dummy",
+			"identity-dummy",
+			expect.any(Function),
+			expect.any(Function),
+		);
+	});
 	beforeEach(() => {
 		const values = new Map();
 		globalThis.localStorage = {

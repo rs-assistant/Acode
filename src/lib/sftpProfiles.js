@@ -72,8 +72,21 @@ export function editSftpProfile({
 	password = "",
 	keyFile = "",
 	passPhrase = "",
+	identityId = "",
 } = {}) {
 	return new Promise((resolve, reject) => {
+		if (authType === "identity") {
+			nativeSftp.editProfileWithIdentity(
+				profileId,
+				hostname,
+				Number.parseInt(port, 10) || 22,
+				username,
+				identityId,
+				resolve,
+				reject,
+			);
+			return;
+		}
 		nativeSftp.editProfile(
 			profileId,
 			hostname,

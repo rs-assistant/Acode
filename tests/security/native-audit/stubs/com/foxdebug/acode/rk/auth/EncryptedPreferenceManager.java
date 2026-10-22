@@ -11,6 +11,7 @@ public class EncryptedPreferenceManager {
     public static String lastNamespace;
     public static boolean lastAllowPlaintextFallback;
     public static boolean failInitialization;
+    public static boolean failWrites;
     private final Map<String, String> store;
 
     public EncryptedPreferenceManager(Context context, String namespace) {
@@ -31,6 +32,11 @@ public class EncryptedPreferenceManager {
     }
 
     public void setString(String key, String value) { store.put(key, value); }
+    public boolean setStringSync(String key, String value) {
+        if (failWrites) return false;
+        store.put(key, value);
+        return true;
+    }
     public void remove(String key) { store.remove(key); }
     public void clear() { store.clear(); }
 }

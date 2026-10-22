@@ -29,6 +29,9 @@
   SSH／SFTP 在 `src/plugins/sftp/`；plugin context 在
   `src/plugins/pluginContext/`；加密儲存在 `src/plugins/auth/`。
 - `src/lib/loadPlugin.js`：第三方 plugin 的實際載入流程。
+- `src/pages/sshKeys/`、`src/lib/sshIdentities.js` 與 SFTP plugin 的
+  `SshKeyMaterial`／`SshIdentityStore`：原生產生 SSH 金鑰、公開中繼資料與儲存區。
+  只允許公鑰與 opaque ID 進入 WebView；勿新增私鑰回傳／剪貼簿／明文 fallback。
 - `config.xml`、`res/android/`：Android 設定與資源的來源。
   `hooks/`：Cordova prepare 時套用到產生專案的自訂處理。
 - `utils/`、`rspack.config.js`：設定、建置及開發工具。
@@ -119,6 +122,9 @@ git diff --check
   UI 文字沿用 `src/lang/` 與既有翻譯流程。
 - 原生行為的變更需要 Android 編譯；涉及 WebView、鍵盤、DeX、SFTP 或終端時，
   另外評估實機／模擬器驗證。Vitest mock 與 typecheck 不能代替裝置測試。
+- 金鑰產生變更另跑 `bash tests/security/keygen-audit/run.sh`（JDK 21、curl、
+  sha256sum、ssh-keygen）；這使用實際 crypto jar，但儲存區仍是 adapter，
+  不能說成 Android Keystore 或實機 SSH 登入已驗證。
 - 報告已執行、通過、失敗、略過與未執行的項目，不能沿用先前 session 的通過
   數量當作本次結果，也不能把零測試或 source 字串檢查當作功能驗證。
 - CI 的 unit test job 有事件條件；上游 nightly 還有 owner 與 secret 條件。

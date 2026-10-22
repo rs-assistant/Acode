@@ -88,6 +88,31 @@ const nativeSftp = {
 	getProfileInfo(profileId, onSuccess, onFail) {
 		invoke("getProfileInfo", [profileId], onSuccess, onFail);
 	},
+	editProfileWithIdentity(
+		profileId,
+		host,
+		port,
+		username,
+		identityId,
+		onSuccess,
+		onFail,
+	) {
+		invoke(
+			"editProfile",
+			[profileId, host, port, username, "identity", "", "", "", identityId],
+			onSuccess,
+			onFail,
+		);
+	},
+	listSshKeys(onSuccess, onFail) {
+		invoke("listSshKeys", [], onSuccess, onFail);
+	},
+	generateSshKey(label, algorithm, onSuccess, onFail) {
+		invoke("generateSshKey", [label, algorithm], onSuccess, onFail);
+	},
+	deleteSshKey(keyId, onSuccess, onFail) {
+		invoke("deleteSshKey", [keyId], onSuccess, onFail);
+	},
 	deleteProfile(profileId, onSuccess, onFail) {
 		invoke("deleteProfile", [profileId], onSuccess, onFail);
 	},

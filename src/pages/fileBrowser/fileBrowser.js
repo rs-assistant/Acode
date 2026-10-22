@@ -493,6 +493,11 @@ function FileBrowserInclude(mode, info, doesOpenLast = true) {
 					addStorage();
 					break;
 
+				case "sshKeys": {
+					const { default: sshKeys } = await import("pages/sshKeys");
+					await sshKeys();
+					break;
+				}
 				case "addFtp":
 				case "addSftp": {
 					const storage = await remoteStorage[action]();

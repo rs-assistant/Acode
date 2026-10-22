@@ -2,6 +2,7 @@ import Ftp from "fileSystem/ftp";
 import Sftp from "fileSystem/sftp";
 import loader from "dialogs/loader";
 import multiPrompt from "dialogs/multiPrompt";
+import select from "dialogs/select";
 import URLParse from "url-parse";
 import helpers from "utils/helpers";
 import Url from "utils/Url";
@@ -11,6 +12,7 @@ import {
 	getSftpProfileId,
 	getSftpProfileInfo,
 } from "./sftpProfiles";
+import { listSshIdentities } from "./sshIdentities";
 import { interstitialAd } from "./startAd";
 
 export default {
@@ -173,6 +175,7 @@ export default {
 		port = 22,
 		alias: initialAlias = "",
 		authType = "password",
+		identityId = "",
 		existingProfile = null,
 	} = {}) {
 		let stopConnection = false;
@@ -185,6 +188,7 @@ export default {
 				username = saved.username;
 				port = saved.port;
 				authType = saved.authType;
+				identityId = saved.identityId || "";
 			} catch (error) {
 				await helpers.error(error);
 				return null;
@@ -200,8 +204,10 @@ export default {
 				alias: initialAlias || existingProfile?.name || "",
 				authType: authType === "keyFile" ? "key" : authType,
 				hasSavedKey: existingProfile?.profileId && authType === "key",
+				identityId,
 			});
-		} catch {
+		} catch (error) {
+			if (error) await helpers.error(error);
 			return null;
 		}
 
@@ -210,7 +216,12 @@ export default {
 			username: values.username,
 			port: values.port,
 			alias: values.alias,
-			authType: values.usePassword ? "password" : "key",
+			authType: values.usePassword
+				? "password"
+				: values.useIdentity
+					? "identity"
+					: "key",
+			identityId: values.identityId,
 			existingProfile,
 		};
 		let profile;
@@ -221,7 +232,12 @@ export default {
 				hostname: values.hostname,
 				username: values.username,
 				port: values.port,
-				authType: values.usePassword ? "password" : "key",
+				authType: values.usePassword
+					? "password"
+					: values.useIdentity
+						? "identity"
+						: "key",
+				identityId: values.identityId,
 				password: values.password,
 				keyFile: values.keyFile,
 				passPhrase: values.passPhrase,
@@ -288,6 +304,7 @@ export default {
 				port: profile.port,
 				alias,
 				authType: profile.authType,
+				identityId: profile.identityId,
 				existingProfile: {
 					...profile,
 					url,
@@ -296,16 +313,32 @@ export default {
 			});
 		}
 
-		function prompt({
+		async function prompt({
 			hostname,
 			username,
 			port,
 			alias,
 			authType,
 			hasSavedKey,
+			identityId,
 		}) {
-			const usePassword = authType !== "key";
-			return multiPrompt(strings["add sftp"], [
+			const usePassword = authType === "password";
+			let selectedIdentity = identityId || "";
+			const keys = await listSshIdentities();
+			function toggleAuthentication(input, mode) {
+				if (!input.checked) return;
+				const body = input.prompt.$body;
+				body.get("#password").hidden = mode !== "password";
+				body.get("#keyFile").hidden = mode !== "key";
+				body.get("#passPhrase").hidden = mode !== "key";
+				body.get("#identityDisplay").hidden = mode !== "identity";
+				if (mode !== "password") body.get("#password").value = "";
+				if (mode !== "key") {
+					body.get("#keyFile").value = "";
+					body.get("#passPhrase").value = "";
+				}
+			}
+			const result = await multiPrompt(strings["add sftp"], [
 				{
 					id: "alias",
 					placeholder: strings.name,
@@ -336,10 +369,7 @@ export default {
 						type: "radio",
 						value: usePassword,
 						onchange() {
-							if (!this.checked) return;
-							this.prompt.$body.get("#password").hidden = false;
-							this.prompt.$body.get("#keyFile").hidden = true;
-							this.prompt.$body.get("#passPhrase").hidden = true;
+							toggleAuthentication(this, "password");
 						},
 					},
 					{
@@ -347,17 +377,54 @@ export default {
 						placeholder: strings["key file"],
 						name: "authType",
 						type: "radio",
-						value: !usePassword,
+						value: authType === "key",
 						onchange() {
-							if (!this.checked) return;
-							const password = this.prompt.$body.get("#password");
-							password.hidden = true;
-							password.value = "";
-							this.prompt.$body.get("#keyFile").hidden = false;
-							this.prompt.$body.get("#passPhrase").hidden = false;
+							toggleAuthentication(this, "key");
+						},
+					},
+					{
+						id: "useIdentity",
+						placeholder: strings["saved ssh key"],
+						name: "authType",
+						type: "radio",
+						value: authType === "identity",
+						onchange() {
+							toggleAuthentication(this, "identity");
 						},
 					},
 				],
+				{
+					id: "identityDisplay",
+					type: "text",
+					readOnly: true,
+					value:
+						keys.find((key) => key.keyId === selectedIdentity)?.label || "",
+					placeholder: strings["choose ssh key"],
+					hidden: authType !== "identity",
+					async onclick() {
+						try {
+							if (!keys.length) {
+								await helpers.error(new Error(strings["no ssh keys"]));
+								return;
+							}
+							const id = await select(
+								strings["choose ssh key"],
+								keys.map((key) => ({
+									value: key.keyId,
+									text: key.label,
+									subText: `${key.algorithm} · ${key.fingerprint}`,
+								})),
+								{ default: selectedIdentity },
+							);
+							if (id) {
+								selectedIdentity = id;
+								this.value = keys.find((key) => key.keyId === id).label;
+							}
+						} catch (error) {
+							if (error) helpers.error(error);
+						}
+					},
+				},
 				{
 					id: "password",
 					placeholder: existingProfile?.profileId
@@ -374,7 +441,7 @@ export default {
 					type: "text",
 					readOnly: true,
 					sensitive: true,
-					hidden: usePassword,
+					hidden: authType !== "key",
 					onclick() {
 						sdcard.openDocumentFile((result) => {
 							this.value = result.uri;
@@ -385,7 +452,7 @@ export default {
 					id: "passPhrase",
 					placeholder: `${strings.passphrase} (${strings.optional})`,
 					type: "password",
-					hidden: usePassword,
+					hidden: authType !== "key",
 				},
 				{
 					id: "port",
@@ -395,6 +462,10 @@ export default {
 					required: true,
 				},
 			]);
+			if (result.useIdentity && !selectedIdentity) {
+				throw new Error(strings["choose ssh key"]);
+			}
+			return { ...result, identityId: selectedIdentity };
 		}
 	},
 	async edit({ name, storageType, url, home }) {

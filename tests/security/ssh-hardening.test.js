@@ -136,6 +136,26 @@ describe("SSH security invariants (source-level regression checks)", () => {
 		expect(sftp).toContain('"HOST_KEY_CHANGED"');
 	});
 
+	it("keeps generated private keys native-only behind the existing SFTP authorization gate", () => {
+		const sftp = read("src/plugins/sftp/src/com/foxdebug/sftp/Sftp.java");
+		const store = read(
+			"src/plugins/sftp/src/com/foxdebug/sftp/SshIdentityStore.java",
+		);
+		const dispatch = sftp.slice(
+			sftp.indexOf("private static boolean isAllowedAction"),
+			sftp.indexOf("public void connectUsingProfile"),
+		);
+		for (const action of ["listSshKeys", "generateSshKey", "deleteSshKey"])
+			expect(dispatch).toContain(`case "${action}":`);
+		expect(dispatch).not.toContain('case "loadKeyPair"');
+		expect(dispatch).not.toContain('case "exportPrivateKey"');
+		expect(store).toContain('"acode_ssh_identity_keys_v1", false');
+		expect(sftp).toContain(
+			'identityStore.loadKeyPair(profile.getString("identityId"))',
+		);
+		expect(sftp).toContain('profile.put("identityId", identityId)');
+	});
+
 	it("uses explicit native day/night themes for all security dialogs", () => {
 		const sftp = read("src/plugins/sftp/src/com/foxdebug/sftp/Sftp.java");
 		const theme = read(
@@ -144,7 +164,7 @@ describe("SSH security invariants (source-level regression checks)", () => {
 		expect(sftp.match(/new AlertDialog\.Builder\(/g)).toHaveLength(1);
 		expect(
 			sftp.match(/= securityDialogBuilder\(\)|\n\s*securityDialogBuilder\(\)/g),
-		).toHaveLength(3);
+		).toHaveLength(4);
 		expect(sftp).toContain(
 			"SftpDialogTheme.forUiMode(activity.getResources().getConfiguration().uiMode)",
 		);

@@ -42,7 +42,7 @@ public class TeeAudit {
         System.out.println("CONTROL: invalid session rejected by actual Tee.java");
 
         for (String id : new String[] {"acode_sftp_profiles_v1", "acode_ssh_known_hosts_v1",
-                "acode_auth_secure", "../acode_sftp_profiles_v1", "foo/bar", "", "x".repeat(201)}) {
+                "acode_auth_secure", "acode_ssh_identity_keys_v1", "../acode_sftp_profiles_v1", "foo/bar", "", "x".repeat(201)}) {
             CallbackContext rejected = call(tee, "requestToken", session, id, "{}");
             check("INVALID_PLUGIN_ID".equals(rejected.error) && rejected.value == null,
                     "App-owned or invalid plugin ID must not mint a token");
