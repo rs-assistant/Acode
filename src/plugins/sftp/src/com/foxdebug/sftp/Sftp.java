@@ -260,7 +260,7 @@ public class Sftp extends CordovaPlugin {
         event.put("data", Base64.encodeToString(bytes, Base64.NO_WRAP));
         sendShellEvent(streamCallback, event, true);
       } catch (JSONException e) {
-        finish(null, e.getMessage());
+        finish(null, errMessage(e));
       }
     }
 
@@ -272,12 +272,12 @@ public class Sftp extends CordovaPlugin {
       try {
         channel.close();
       } catch (Exception e) {
-        Log.w(TAG, "Failed to close SSH shell channel " + id, e);
+        Log.w(TAG, "Failed to close SSH shell channel");
       }
       try {
         client.close();
       } catch (IOException e) {
-        Log.w(TAG, "Failed to close SSH shell connection " + id, e);
+        Log.w(TAG, "Failed to close SSH shell connection");
       }
 
       try {
@@ -360,14 +360,14 @@ public class Sftp extends CordovaPlugin {
       try {
         previousSftp.quit();
       } catch (Exception e) {
-        Log.w(TAG, "Failed to close the SFTP subsystem", e);
+        Log.w(TAG, "Failed to close the SFTP subsystem");
       }
     }
     if (previousSsh != null) {
       try {
         previousSsh.close();
       } catch (Exception e) {
-        Log.w(TAG, "Failed to close the SSH connection", e);
+        Log.w(TAG, "Failed to close the SSH connection");
       }
     }
   }
@@ -406,7 +406,7 @@ public class Sftp extends CordovaPlugin {
       try {
         sftp.getSubsystemChannel().setCharsetEncoding("UTF-8");
       } catch (UnsupportedEncodingException | SshException e) {
-        Log.w(TAG, "Failed to set UTF-8 encoding, using the default", e);
+        Log.w(TAG, "Failed to set UTF-8 encoding, using the default");
       }
       return true;
     }
@@ -645,7 +645,7 @@ public class Sftp extends CordovaPlugin {
 
         @Override
         public void onChannelError(Channel source, Throwable error) {
-          shell.finish(null, error == null ? "SSH shell error" : error.toString());
+          shell.finish(null, SftpErrors.message(error));
         }
       }
     );
@@ -702,7 +702,7 @@ public class Sftp extends CordovaPlugin {
             } catch (Exception e) {
               if (security != null && security.report(callback)) return;
               callback.error("Failed to open SSH shell: " + errMessage(e));
-              Log.e(TAG, "Failed to open SSH shell from profile", e);
+              Log.e(TAG, "Failed to open SSH shell from profile");
             }
           }
         }
@@ -739,7 +739,7 @@ public class Sftp extends CordovaPlugin {
               callback.success(securityStore.saveProfile(requestedID, profile));
             } catch (Exception e) {
               callback.error("Could not securely save SFTP profile: " + errMessage(e));
-              Log.e(TAG, "Could not save SFTP profile", e);
+              Log.e(TAG, "Could not save SFTP profile");
             }
           }
         }
@@ -818,7 +818,7 @@ public class Sftp extends CordovaPlugin {
               callback.error(
                 "Could not securely save SFTP profile: " + errMessage(e)
               );
-              Log.e(TAG, "Could not save SFTP profile", e);
+              Log.e(TAG, "Could not save SFTP profile");
             }
           }
         }
@@ -950,7 +950,7 @@ public class Sftp extends CordovaPlugin {
     }
 
     if (!isAllowedAction(action)) {
-      callback.error("SFTP action is not available: " + action);
+      callback.error("SFTP action is not available");
       return false;
     }
     try {
@@ -962,13 +962,13 @@ public class Sftp extends CordovaPlugin {
         return true;
       }
     } catch (NoSuchMethodException e) {
-      callback.error("Method not found: " + action);
+      callback.error("SFTP action is not available");
       return false;
     } catch (SecurityException e) {
-      callback.error("Security exception: " + e.getMessage());
+      callback.error(errMessage(e));
       return false;
     } catch (Exception e) {
-      callback.error("Exception: " + e.getMessage());
+      callback.error(errMessage(e));
       return false;
     }
 
@@ -1113,7 +1113,7 @@ public class Sftp extends CordovaPlugin {
             return null;
           }
           attempt.error("Failed to connect SFTP profile: " + errMessage(e));
-          Log.e(TAG, "Failed to connect SFTP profile", e);
+          Log.e(TAG, "Failed to connect SFTP profile");
         } catch (OutOfMemoryError e) {
           synchronized (connectionLock) {
             closeConnectionQuietly();
@@ -1208,7 +1208,7 @@ public class Sftp extends CordovaPlugin {
               | SecurityException
               | SshException e
             ) {
-              Log.e("getFile", "Error downloading file", e);
+              Log.e(TAG, "Error downloading file");
               callback.error("File transfer error: " + errMessage(e));
             }
           }
@@ -1366,7 +1366,7 @@ public class Sftp extends CordovaPlugin {
   ) {
     synchronized (connectionLock) {
       if (failedSftp == null || sftp != failedSftp) return;
-      Log.w(TAG, "Invalidating failed SFTP connection", failure);
+      Log.w(TAG, "Invalidating failed SFTP connection");
       closeConnectionQuietly();
     }
   }
@@ -1655,11 +1655,6 @@ public class Sftp extends CordovaPlugin {
   }
 
   public String errMessage(Exception e) {
-    String res = e.getMessage();
-    if (res == null || res.equals("")) {
-      return e.toString();
-    }
-
-    return res;
+    return SftpErrors.message(e);
   }
 }

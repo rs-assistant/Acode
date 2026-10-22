@@ -6,7 +6,7 @@ Run from the repository root with JDK 21, curl, and sha256sum:
 bash tests/security/native-audit/run.sh
 ```
 
-The script compiles the current application's `Tee.java`, unchanged, together
+The script compiles the current application's `Tee.java` and `SftpErrors.java`, unchanged, together
 with the adapters under `stubs/` and the pinned org.json 20240303 jar. The first
 run downloads that jar from Maven Central over verified TLS and checks its
 SHA-256. Compiled classes and dependency cache stay outside the checkout.
@@ -23,6 +23,11 @@ validation, and token/capability revocation on reset/destroy. These are now
 regression assertions for the fixes, not successful exploit assertions. The
 historical tablet-source branch retains the earlier characterization harness.
 This does not validate actual encrypted Android storage or native caller identity.
+
+It also checks the read-only safe-edition policy and fixed error categories using
+dummy secret-bearing exceptions, including exceptions that throw if their raw
+message/string is read. CI has an independent JDK 21 job for this harness; a
+workflow committed to the fork does not itself prove GitHub executed that job.
 
 See [the audit report](../../../security/tablet-ssh-audit.md) for the combined
 JS/native evidence and remaining device checks.

@@ -18,6 +18,31 @@ describe("SSH security invariants (source-level regression checks)", () => {
 		expect(rules).toMatch(
 			/<device-transfer>[\s\S]*?<exclude domain="root" path="\."\s*\/>[\s\S]*?<\/device-transfer>/,
 		);
+		for (const section of ["cloud-backup", "device-transfer"]) {
+			const body = rules.split(`<${section}>`)[1].split(`</${section}>`)[0];
+			for (const domain of [
+				"root",
+				"file",
+				"database",
+				"sharedpref",
+				"external",
+				"device_root",
+				"device_file",
+				"device_database",
+				"device_sharedpref",
+			]) {
+				expect(body).toContain(`<exclude domain="${domain}" path="." />`);
+			}
+		}
+	});
+
+	it("does not forward raw native exceptions to JS or Android logs", () => {
+		const sftp = read("src/plugins/sftp/src/com/foxdebug/sftp/Sftp.java");
+		expect(sftp).not.toMatch(/\.getMessage\(/);
+		expect(sftp).not.toMatch(/(?:error|failure|e)\.toString\(/);
+		expect(sftp).not.toMatch(/Log\.[we]\([^;]*,\s*(?:e|error|failure)\s*\)/);
+		expect(sftp).toContain("return SftpErrors.message(e)");
+		expect(sftp).toContain("shell.finish(null, SftpErrors.message(error))");
 	});
 
 	it("requires the native safe-build policy before any third-party script loading", () => {

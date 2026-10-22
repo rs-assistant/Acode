@@ -61,3 +61,20 @@ test binary without a new source/validation record and clear test instructions.
   62 tasks, 6 executed and 56 up-to-date, 13 seconds.
 - See [safe-mode design and device acceptance](ssh-safe-mode.md). No new APK was
   published and the existing tablet download remains unchanged.
+
+## Stage 4: backup domains, safe errors and native CI
+
+- Exclude all nine supported app data domains in both cloud-backup and
+  device-transfer rules; retain `allowBackup=false`. Verify all 18 exclusions in
+  the APK with aapt2, rather than checking source XML alone.
+- Replace raw SSH/SFTP exception text, shell errors and exception-bearing log
+  calls with fixed categories/static logs. Preserve host-key verification data.
+- Add 11 native dummy-secret error assertions and a pinned-action JDK 21 CI job.
+  Local harness: 34 Tee + 11 error assertions passed. Targeted security JS tests:
+  3 files, 32 passed. Android build/signature passed: 62 tasks, 12 executed and
+  50 up-to-date, 16 seconds. See [details](backup-and-errors.md).
+- Packaged manifest was inspected: backup false, extraction resource present.
+  Cleartext remains true for existing localhost terminal/preview compatibility;
+  no broad cleartext-policy redesign or real-device validation is claimed.
+- The workflow is committed, but remote CI execution is not verified. No emulator
+  or tablet is connected to this environment; production release stays blocked.
