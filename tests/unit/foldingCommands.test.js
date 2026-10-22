@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 
-import { javascript } from "@codemirror/lang-javascript";
+import { javascript, javascriptLanguage } from "@codemirror/lang-javascript";
 import { codeFolding, foldedRanges } from "@codemirror/language";
 import { EditorState } from "@codemirror/state";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -9,6 +9,7 @@ const parsing = vi.hoisted(() => ({
 	ensureSyntaxTree: vi.fn(),
 	forceParsing: vi.fn(),
 	syntaxTreeAvailable: vi.fn(),
+	syntaxTree: vi.fn(),
 }));
 
 vi.mock("@codemirror/language", async (importOriginal) => ({
@@ -16,6 +17,7 @@ vi.mock("@codemirror/language", async (importOriginal) => ({
 	ensureSyntaxTree: parsing.ensureSyntaxTree,
 	forceParsing: parsing.forceParsing,
 	syntaxTreeAvailable: parsing.syntaxTreeAvailable,
+	syntaxTree: parsing.syntaxTree,
 }));
 
 const { foldAllCodeBlocks, unfoldAllCodeBlocks } = await import(
@@ -72,6 +74,13 @@ describe("progressive Fold all", () => {
 		parsing.ensureSyntaxTree.mockReset().mockReturnValue(null);
 		parsing.forceParsing.mockReset();
 		parsing.syntaxTreeAvailable.mockReset().mockReturnValue(false);
+		// forceParsing is mocked below; provide the corresponding complete tree
+		// explicitly instead of depending on EditorState's real-time parse budget.
+		parsing.syntaxTree
+			.mockReset()
+			.mockImplementation((state) =>
+				javascriptLanguage.parser.parse(state.doc.toString()),
+			);
 	});
 
 	afterEach(() => {

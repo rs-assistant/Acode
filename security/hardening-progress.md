@@ -78,3 +78,21 @@ test binary without a new source/validation record and clear test instructions.
   no broad cleartext-policy redesign or real-device validation is claimed.
 - The workflow is committed, but remote CI execution is not verified. No emulator
   or tablet is connected to this environment; production release stays blocked.
+
+## Stage 5: preview and toolchain dependency updates
+
+- Update bundled DOMPurify, markdown-it and Mermaid within their major versions,
+  plus allowed-range vulnerable npm build-tool leaves. Keep Cordova 13 and avoid
+  forced major changes/overrides. Add jsdom-only preview regression coverage.
+- Fresh lockfile installation succeeded. Final full Vitest: 95 files, 844 tests
+  passed; typecheck, Biome/diff checks and 34 + 11 native assertions passed.
+  Fix the folding test's incomplete parsing mock after reproducing full-run
+  failures and an isolated pass; no production folding behavior was changed.
+- Android Debug build/signature passed after the dependency updates (16 seconds,
+  62 tasks up-to-date after an earlier successful 18-second bundle build).
+- Audit findings are reduced but not cleared: omit-dev 11 affected nodes,
+  full/development scan 30. See [audit and remaining risks](dependency-audit.md).
+  A targeted Gradle check resolved commons-io to 2.20.0, not the plugin's older
+  declaration. No comprehensive Java vulnerability scan is claimed.
+- Main, tablet artifact and original tablet source branches remain unchanged.
+  No real Android device/emulator or successful real-browser test was available.
