@@ -16,6 +16,7 @@ import JSZip from "jszip";
 import actionStack from "lib/actionStack";
 import checkFiles from "lib/checkFiles";
 import config from "lib/config";
+import nativeSftp from "lib/nativeSftp";
 import openFolder from "lib/openFolder";
 import projects from "lib/projects";
 import recents from "lib/recents";
@@ -264,7 +265,7 @@ function FileBrowserInclude(mode, info, doesOpenLast = true) {
 					() => {},
 					() => {},
 				);
-				sftp.close(
+				nativeSftp.close(
 					() => {},
 					() => {},
 				);
@@ -1282,12 +1283,12 @@ function FileBrowserInclude(mode, info, doesOpenLast = true) {
 					const { username, hostname, port = 22 } = Url.decodeUrl(storageUrl);
 					const connectionID = profileId || `${username}@${hostname}:${port}`;
 					await new Promise((resolve) => {
-						sftp.isConnected((activeConnectionID) => {
+						nativeSftp.isConnected((activeConnectionID) => {
 							if (activeConnectionID !== connectionID) {
 								resolve();
 								return;
 							}
-							sftp.close(resolve, resolve);
+							nativeSftp.close(resolve, resolve);
 						}, resolve);
 					});
 					const profileStillUsed = storageList.some(

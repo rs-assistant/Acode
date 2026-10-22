@@ -53,6 +53,7 @@ import loadPlugins from "lib/loadPlugins";
 import Logger from "lib/logger";
 import notificationManager from "lib/notificationManager";
 import openFolder, { addedFolder } from "lib/openFolder";
+import { connect as connectTrustedNativeSession } from "lib/pluginContext";
 import { registerPrettierFormatter } from "lib/registerPrettierFormatter";
 import restoreFiles from "lib/restoreFiles";
 import settings from "lib/settings";
@@ -119,6 +120,10 @@ async function ensurePermission(permission) {
 
 async function onDeviceReady() {
 	await initEncodings(); // important to load encodings before anything else
+
+	// Establish the app-only native session before any installed plugin script
+	// can run. SFTP capabilities are derived from this private session.
+	await connectTrustedNativeSession();
 
 	const isFreePackage = /(free)$/.test(BuildInfo.packageName);
 	const oldResolveURL = window.resolveLocalFileSystemURL;

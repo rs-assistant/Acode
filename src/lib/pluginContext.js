@@ -102,6 +102,7 @@ Object.freeze(PluginContext.prototype);
 class TrustedSession {
 	#session = null;
 	#sessionPromise = null;
+	#sftpCapabilityPromise = null;
 
 	// Establishes the connection (once) and resolves to a boolean. The session
 	// secret is deliberately never returned to callers.
@@ -152,12 +153,37 @@ class TrustedSession {
 			return null;
 		}
 	}
+
+	getSftpCapability() {
+		if (!this.#sftpCapabilityPromise) {
+			this.#sftpCapabilityPromise = this.connectInternal().then((connected) => {
+				if (!connected || !this.#session) {
+					throw new Error("Trusted native session is unavailable");
+				}
+
+				return new Promise((resolve, reject) => {
+					cordovaExec(resolve, reject, "Tee", "requestSftpCapability", [
+						this.#session,
+					]);
+				});
+			});
+		}
+
+		return this.#sftpCapabilityPromise;
+	}
 }
 
 const trustedSession = new TrustedSession();
 
 export function connect() {
 	return trustedSession.connectInternal();
+}
+
+// This capability is kept inside the bundled app modules. It is intentionally
+// not exposed through window.sftp or the plugin context handed to third-party
+// scripts. Native SFTP rejects every call that does not carry it.
+export function getSftpCapability() {
+	return trustedSession.getSftpCapability();
 }
 
 export default function generate(pluginId, pluginJson) {

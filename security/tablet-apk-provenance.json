@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "recorded_date": "2026-10-22",
+  "record_type": "retrospective-source-snapshot-not-build-attestation",
+  "repository": "rs-assistant/Acode",
+  "source_branch": "test/tablet-apk-source",
+  "source_commit": "1721694d5f4f095552f7d78a32ce9c0953ac060e",
+  "source_baseline": "ef7f32656a5c4216209ac7e8d24e81bb1564ff8b",
+  "separate_security_branch_head_at_audit": "266cf643a5e00c14942c71dcd212f1674abc6312",
+  "artifact": {
+    "filename": "app-debug.apk",
+    "size_bytes": 43234795,
+    "sha256": "d4bb10db18b664cd74b10ecfa723e4c8f43687cea41af92fe8f8cf06fece4bfb",
+    "built_date": "2026-10-20",
+    "branch": "test/tablet-apk",
+    "initial_artifact_commit": "5ca7fdab467c0a3ddfaec144f6aebfe9c8ab9c15",
+    "immutable_download_url": "https://github.com/rs-assistant/Acode/raw/5ca7fdab467c0a3ddfaec144f6aebfe9c8ab9c15/app-debug.apk",
+    "package_id": "com.foxdebug.acode",
+    "version_name": "1.13.5",
+    "variant": "paid-debug",
+    "signing_certificate_sha256": "c6a811233830332c03851f95b3487faa7e4bde3b93f854b9cf4d8cb2a7969351",
+    "bundled_main_js_sha256": "c2082d5a7604b2fd867475ce960e1789bb677b8385577f519205f92bcacde279"
+  },
+  "verified_toolchain": {
+    "node": "24.19.0",
+    "jdk": "21.0.12.1",
+    "cordova": "13.0.0",
+    "cordova_android": "15.1.0",
+    "rspack": "2.2.0",
+    "android_sdk": 36,
+    "android_build_tools": "36.0.0",
+    "gradle_wrapper": "8.14.2",
+    "agp": "8.10.1",
+    "kotlin_gradle_plugin": "2.3.0"
+  },
+  "native_source_sha256": {
+    "src/plugins/pluginContext/src/android/Tee.java": "c51cf3871874be138ea3a9af592856f8aedd38dcda0b5d5daa0b08a3b8aac9b1",
+    "src/plugins/sftp/src/com/foxdebug/sftp/Sftp.java": "0794bb41ae6a0585e35dcf51cab991e453a17528a9d6e28ee5a4ca6d9e0f4c21",
+    "src/plugins/sftp/src/com/foxdebug/sftp/SftpSecurityStore.java": "9d5fa6a6bb1b658e42d7d6d114bf9db8de93c23f3aa16cab94c677eff3ed09fe",
+    "src/plugins/auth/src/android/EncryptedPreferenceManager.java": "6daaaf06261359e7c95592e2ab4db8d74245a514fb82ae4fe5a808f61fae3abf"
+  },
+  "evidence": [
+    "Published APK SHA-256 matches the retained build output.",
+    "APK assets/www/build/main.js matches the retained Rspack output.",
+    "The four listed native sources match their retained generated Android project copies.",
+    "APK signature verification succeeded; the public signing-certificate digest is recorded above.",
+    "Source snapshot checks: 811 tests passed, 1 skipped; typecheck passed.",
+    "The source commit captures previously uncommitted runtime changes without merging the 17 separate remote security commits."
+  ],
+  "limitations": [
+    "The source snapshot was committed after the build; this is not a signed build provenance attestation.",
+    "Matching generated Java sources is not independent verification of APK DEX bytecode.",
+    "A new Debug build can have different bytes, timestamps, paths, and signing credentials.",
+    "No Android runtime or production SSH security approval is implied."
+  ],
+  "ssh_production_release_gate": "BLOCKED"
+}

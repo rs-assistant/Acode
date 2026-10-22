@@ -9,10 +9,6 @@
     <keywords>cordova,ftp</keywords>
     <repo>https://github.com/foxdebug/cordova-plugin-sftp.git</repo>
 
-    <js-module src="www/sftp.js" name="sftp">
-        <clobbers target="window.sftp" />
-    </js-module>
-
     <!-- android -->
     <platform name="android">
         <config-file target="res/xml/config.xml" parent="/*">

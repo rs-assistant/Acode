@@ -2,6 +2,15 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const { deleteMock } = vi.hoisted(() => ({ deleteMock: vi.fn() }));
 
+vi.mock("lib/nativeSftp", () => ({
+	default: new Proxy(
+		{},
+		{
+			get: (_target, property) => globalThis.sftp?.[property],
+		},
+	),
+}));
+
 vi.mock("fileSystem", () => ({
 	default: () => ({ delete: deleteMock }),
 }));
