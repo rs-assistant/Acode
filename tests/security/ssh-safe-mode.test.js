@@ -100,7 +100,21 @@ describe("native SSH-safe policy", () => {
 	});
 });
 
-describe("real source plugin execution entry points", () => {
+describe.each([
+	["native safe policy", safePolicy, false],
+	["native error", null, true],
+	["missing policy fields", {}, false],
+	[
+		"conflicting plugin permission",
+		{ ...safePolicy, thirdPartyPluginsAllowed: true },
+		false,
+	],
+])("real source plugin execution entry points: %s", (_name, reply, fail) => {
+	const makePolicy = () => policyModule(reply, fail);
+	const notice =
+		fail || reply !== safePolicy
+			? "Security policy unavailable"
+			: "SSH safe mode";
 	it("shows a safe-mode notice instead of marketplace or install controls", async () => {
 		const page = { append: vi.fn() };
 		const app = { append: vi.fn() };
@@ -133,12 +147,12 @@ describe("real source plugin execution entry points", () => {
 				fileSystem: fs,
 				"components/page": () => page,
 				"html-tag-js": tag,
-				"lib/sshSecurityPolicy": policyModule(),
+				"lib/sshSecurityPolicy": makePolicy(),
 			},
 			{ app, tag, strings: { plugins: "Plugins" } },
 		);
 		await show([]);
-		expect(page.append.mock.calls[0][0].textContent).toContain("SSH safe mode");
+		expect(page.append.mock.calls[0][0].textContent).toContain(notice);
 		expect(app.append).toHaveBeenCalledWith(page);
 		expect(fs).not.toHaveBeenCalled();
 	});
@@ -180,20 +194,20 @@ describe("real source plugin execution entry points", () => {
 				...dependencies,
 				fileSystem: fs,
 				"dialogs/alert": alert,
-				"lib/sshSecurityPolicy": policyModule(),
+				"lib/sshSecurityPolicy": makePolicy(),
 			},
 			{ strings: { "ssh safe mode": "SSH safe mode" } },
 		);
 		await show("dummy.plugin", undefined, undefined, true);
 		expect(alert).toHaveBeenCalledWith(
 			"SSH safe mode",
-			expect.stringContaining("disables all third-party plugins"),
+			expect.stringContaining(notice),
 		);
 		expect(fs).not.toHaveBeenCalled();
 	});
 
 	it("blocks direct script loading before native connect, filesystem or DOM access", async () => {
-		const policy = policyModule();
+		const policy = makePolicy();
 		const connect = vi.fn();
 		const fs = vi.fn();
 		const unmountPlugin = vi.fn();
@@ -231,7 +245,7 @@ describe("real source plugin execution entry points", () => {
 				"../utils/Url": {},
 				"./loadPlugin": loadPlugin,
 				"./settings": settings,
-				"./sshSecurityPolicy": policyModule(),
+				"./sshSecurityPolicy": makePolicy(),
 			},
 			{ acode },
 		);
@@ -266,7 +280,7 @@ describe("real source plugin execution entry points", () => {
 			"./config": {},
 			"./installState": {},
 			"./loadPlugins": {},
-			"./sshSecurityPolicy": policyModule(),
+			"./sshSecurityPolicy": makePolicy(),
 		});
 		await expect(install("dummy.plugin")).rejects.toMatchObject({
 			name: "PluginExecutionBlockedError",
@@ -283,7 +297,7 @@ describe("real source plugin execution entry points", () => {
 			"utils/helpers": {},
 			"utils/Url": {},
 			"./config": {},
-			"./sshSecurityPolicy": policyModule(),
+			"./sshSecurityPolicy": makePolicy(),
 		});
 		await expect(tools.init()).rejects.toMatchObject({
 			name: "PluginExecutionBlockedError",

@@ -166,3 +166,29 @@ test binary without a new source/validation record and clear test instructions.
   branches and main are unchanged. See [design and download](ssh-key-generation.md).
 - Real tablet generation, key-authenticated SFTP/shell, Keystore, delete/restart
   and old-profile regression checks remain pending; production release is BLOCKED.
+
+## Stage 9: tablet feedback, durable-write failures and build defaults
+
+- Record subsequent user-reported basic functional success separately in
+  [tablet feedback](tablet-test-feedback.md); do not treat it as completion of
+  Keystore, deletion/failure or adversarial plugin checks.
+- Fix strict preference writes so a failed commit cannot leave usable unconfirmed
+  cached SSH state. Namespace-shared locking/failure latches apply across manager
+  instances; recovery requires process restart and inspection, not a JS reload.
+  Profile deletion now checks persistence and reports failures from the dialog.
+- Replace the missing-flavour flag's silent target-28 fallback with Cordova's
+  configured SDK; preserve the explicit legacy F-Droid override and reject invalid
+  flags. Four new tests reproduce the old behavior and validate the fix.
+- Fresh full Vitest: 97 files / 888 tests passed. Typecheck, targeted Biome and
+  diff checks passed. Native core: 52 assertions; production preference/SFTP-store
+  harness: 79; crypto/vault: 55 + 30. Android/AndroidX remain explicit adapters.
+- Native Android rebuild/signature passed (20 seconds, 62 tasks: 13 executed,
+  49 up-to-date), deliberately with no fdroid.bool. Packaged min/target/compile
+  SDK 26/36/36, backup false and all 18 data-extraction exclusions verified;
+  cleartext remains true for the existing localhost workflows.
+- Rerun npm audit: omit-dev 11 nodes (9 high / 2 low), full 30 nodes (22 high /
+  5 moderate / 3 low), both exit 1. No dependencies/lockfile changed this stage.
+- GitHub API returned no registered workflows or branch runs; no remote CI
+  success claimed and no account/repository Actions permissions were changed.
+- See [failure model, recovery and validation](storage-failure-hardening.md).
+  Production release remains BLOCKED.

@@ -49,8 +49,11 @@ final class SftpSecurityStore {
     return new JSONObject(storedProfile);
   }
 
-  synchronized void deleteProfile(String profileID) {
-    if (isProfileID(profileID)) profiles.removeSync(profileID);
+  synchronized void deleteProfile(String profileID) throws GeneralSecurityException {
+    if (!isProfileID(profileID)) throw new GeneralSecurityException("Invalid SFTP profile ID");
+    if (!profiles.removeSync(profileID)) {
+      throw new GeneralSecurityException("Could not persist SFTP profile deletion");
+    }
   }
 
   synchronized JSONObject getKnownHost(String host) throws JSONException {

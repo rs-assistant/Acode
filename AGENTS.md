@@ -125,6 +125,9 @@ git diff --check
 - 金鑰產生變更另跑 `bash tests/security/keygen-audit/run.sh`（JDK 21、curl、
   sha256sum、ssh-keygen）；這使用實際 crypto jar，但儲存區仍是 adapter，
   不能說成 Android Keystore 或實機 SSH 登入已驗證。
+- 加密儲存／同步寫入變更另跑 `bash tests/security/preferences-audit/run.sh`。
+  Android commit 失敗時快取仍可能已更新，不能用「失敗就保留舊記憶體值」的
+  fake 證明安全；strict namespace 失敗後必須拒絕同程序存取及重新開啟。
 - 報告已執行、通過、失敗、略過與未執行的項目，不能沿用先前 session 的通過
   數量當作本次結果，也不能把零測試或 source 字串檢查當作功能驗證。
 - CI 的 unit test job 有事件條件；上游 nightly 還有 owner 與 secret 條件。

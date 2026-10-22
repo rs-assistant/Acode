@@ -19,7 +19,13 @@ This branch is **not approved for production SSH credentials**.
       saved-identity SFTP/shell login, deletion/restart and old-profile compatibility
       on Android; actual-library JVM crypto tests do not close this requirement.
 - [x] Inspect built APK backup/data extraction and network flags. Cleartext remains enabled for existing localhost preview/terminal compatibility; a network-policy redesign is not claimed.
-- [ ] Run dependency scans, CI tests, and Android emulator/device tests.
+- [x] Rerun local npm dependency scans and document remaining findings (not clean).
+- [ ] Run remote CI and outstanding Android emulator/device security tests.
 - [ ] Review the patch and document residual risks.
+
+Basic key-generation/login testing has positive [user feedback](tablet-test-feedback.md).
+This does not complete the more specific failure/deletion/adversarial checklist.
+The follow-up [storage-failure hardening](storage-failure-hardening.md) has its own
+local regressions and still requires device acceptance.
 
 Do not interpret a passing source-text test as a security proof.

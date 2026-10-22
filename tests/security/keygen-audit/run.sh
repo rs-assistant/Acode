@@ -33,3 +33,17 @@ javac -cp "$acode_key_cp" -d "$acode_key_classes" \
   "$acode_repo/src/plugins/sftp/src/com/foxdebug/sftp/SshIdentityStore.java" \
   "$acode_repo/tests/security/keygen-audit/KeygenAudit.java"
 java -cp "$acode_key_classes:$acode_key_cp" com.foxdebug.sftp.KeygenAudit
+# Also exercise the production preference manager, not the simpler crypto-only
+# harness's storage fake. These adapters deliberately change memory on failed disk
+# writes, matching the failure ordering that the native manager must handle.
+acode_key_strict_classes=$(mktemp -d "${TMPDIR:-/tmp}/acode-keygen-strict.XXXXXX")
+mapfile -t acode_key_pref_stubs < <(find "$acode_repo/tests/security/preferences-audit/stubs" -name '*.java' -type f)
+javac -cp "$acode_key_cp:$acode_key_classes" -d "$acode_key_strict_classes" \
+  "${acode_key_pref_stubs[@]}" \
+  "$acode_repo/src/plugins/auth/src/android/EncryptedPreferenceManager.java" \
+  "$acode_repo/src/plugins/sftp/src/com/foxdebug/sftp/SshKeyMaterial.java" \
+  "$acode_repo/src/plugins/sftp/src/com/foxdebug/sftp/SshIdentityStore.java" \
+  "$acode_repo/tests/security/keygen-audit/IdentityFailureAudit.java"
+for acode_key_failure in generate delete exception; do
+  java -cp "$acode_key_strict_classes:$acode_key_cp" com.foxdebug.sftp.IdentityFailureAudit "$acode_key_failure"
+done

@@ -19,3 +19,10 @@ production private key, SSH server or external authentication is used.
 Storage is deliberately fake. The tests assert strict constructor selection and
 commit/refusal behavior, not real encryption or Android Keystore. See
 [design, limits and tablet steps](../../../security/ssh-key-generation.md).
+
+An additional three fresh-JVM cases compile the **production preference manager**
+and identity vault using the cache-first Android/AndroidX adapters from
+preferences-audit. They exercise failed generation/deletion/thrown commit, then
+verify all subsequent key use and namespace reopening are blocked. These add
+30 assertions to the original 55 crypto/simple-storage assertions; they still
+do not establish real Android encryption or storage durability.

@@ -946,8 +946,13 @@ public class Sftp extends CordovaPlugin {
             .setPositiveButton(
               "Delete",
               (ignored, which) -> {
-                securityStore.deleteProfile(profileID);
-                callback.success();
+                try {
+                  securityStore.deleteProfile(profileID);
+                  callback.success();
+                } catch (Exception error) {
+                  callback.error("Could not securely delete SFTP profile");
+                  Log.e(TAG, "Could not delete SFTP profile");
+                }
               }
             )
             .create();

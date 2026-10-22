@@ -75,6 +75,10 @@ cancel an in-flight handshake that already loaded key material, terminate existi
 authenticated sessions, or promise forensic erasure. Disconnect sessions and
 remove server-side authorized_keys entries separately when revocation is required.
 
+Follow-up storage hardening rejects further access for that process after an
+unconfirmed strict commit; a failed write does not guarantee unchanged cached
+state. See [failure behavior and recovery](storage-failure-hardening.md).
+
 ## Validation
 
 - Full suite: 97 files / 866 tests passed on the final run; typecheck and targeted
@@ -106,3 +110,6 @@ commit `360e9b38b53b891dca6097a4c90f69e5155631d2`. See the
 returned HTTP 200 and matched all built bytes; the downloaded signature was
 verified. All three previous tablet artifact branches and main remain unchanged.
 Public download verification is not Android generation/Keystore/login testing.
+
+Subsequent [tablet feedback](tablet-test-feedback.md) reports basic functional
+success. It does not close the outstanding adversarial/deletion/failure checks.
