@@ -53,3 +53,14 @@ until device checks are completed with dummy credentials.
    plugin execution must stay blocked and the UI must remain responsive.
 
 The older public tablet APK is unchanged and does **not** contain this policy.
+
+## New tablet test artifact (2026-10-22)
+
+With the user's approval, a separate artifact-only branch now provides the
+[SSH-safe tablet test APK](https://github.com/rs-assistant/Acode/raw/refs/heads/test/ssh-safe-apk-20261022/acode-ssh-safe-e1b32fc7-debug.apk).
+See the [installation/test instructions](https://github.com/rs-assistant/Acode/blob/8cf12bf67e0f0a37984cb2006c1a869f7549a9f1/README.md)
+and [publication record](ssh-safe-tablet-publication.json). Its exact source is
+`e1b32fc7e72dd0a36cea1454338f4be3fbbfa38c`, not later documentation-only commits.
+The public download was fetched without GitHub authentication, compared byte for
+byte against the built APK, and its signature verified. This does not complete
+the Android runtime/upgrade checklist or approve production SSH credentials.

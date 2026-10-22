@@ -96,3 +96,28 @@ test binary without a new source/validation record and clear test instructions.
   declaration. No comprehensive Java vulnerability scan is claimed.
 - Main, tablet artifact and original tablet source branches remain unchanged.
   No real Android device/emulator or successful real-browser test was available.
+
+## Stage 6: separately approved tablet test publication
+
+- The user approved a new, separate download branch while retaining the original
+  APK and link. Publish only APK, README, SHA256SUMS and PROVENANCE.json on
+  `test/ssh-safe-apk-20261022`, artifact commit
+  `8cf12bf67e0f0a37984cb2006c1a869f7549a9f1`; exact runtime source is `e1b32fc7`.
+- Fresh local validation: 95 Vitest files / 844 tests, typecheck and 34 + 11 native
+  assertions passed. Rebuild and APK signature verification passed. The five
+  recorded Java sources match their generated Android copies; packaged main.js
+  matches the bundled output. This is not independent DEX/runtime verification.
+- Final packaging inspection found the existing hook defaults to target SDK 28
+  without its variant flag. That initial output was NOT published. Explicitly
+  provide a task-local `fdroid.bool=false` and rebuild the paid Debug variant:
+  packaged min/target/compile SDK are 26/36/36, matching the original target 36.
+  Final build: 11 seconds, 62 tasks, 5 executed and 57 up-to-date.
+- Package/versionCode/signing certificate match the earlier Debug APK. Actual
+  Android upgrade behavior remains untested; instructions warn against uninstalling
+  on a signature conflict. Published artifact is 45,842,546 bytes, SHA-256
+  `f2ce0277a237afcefb27bcbc92a676a5e6ffb84f7a15adbdaf19657c4bfae0b5`.
+- Anonymous public download returned HTTP 200; all bytes, SHA-256 and signature
+  were rechecked after downloading. Old artifact/source branches and main were
+  confirmed unchanged. See [publication record](ssh-safe-tablet-publication.json).
+- Production release remains BLOCKED. Only dummy-credential tablet testing is
+  requested; dependency findings, device/upgrade and adversarial tests remain open.

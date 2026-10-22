@@ -1,0 +1,31 @@
+{
+	"recorded_date": "2026-10-22",
+	"user_timezone": "Asia/Taipei",
+	"source_commit": "e1b32fc7e72dd0a36cea1454338f4be3fbbfa38c",
+	"artifact_branch": "test/ssh-safe-apk-20261022",
+	"artifact_commit": "8cf12bf67e0f0a37984cb2006c1a869f7549a9f1",
+	"filename": "acode-ssh-safe-e1b32fc7-debug.apk",
+	"download_url": "https://github.com/rs-assistant/Acode/raw/refs/heads/test/ssh-safe-apk-20261022/acode-ssh-safe-e1b32fc7-debug.apk",
+	"immutable_download_url": "https://github.com/rs-assistant/Acode/raw/8cf12bf67e0f0a37984cb2006c1a869f7549a9f1/acode-ssh-safe-e1b32fc7-debug.apk",
+	"provenance_url": "https://github.com/rs-assistant/Acode/blob/8cf12bf67e0f0a37984cb2006c1a869f7549a9f1/PROVENANCE.json",
+	"installation_and_test_instructions_url": "https://github.com/rs-assistant/Acode/blob/8cf12bf67e0f0a37984cb2006c1a869f7549a9f1/README.md",
+	"size_bytes": 45842546,
+	"sha256": "f2ce0277a237afcefb27bcbc92a676a5e6ffb84f7a15adbdaf19657c4bfae0b5",
+	"signing_certificate_sha256": "c6a811233830332c03851f95b3487faa7e4bde3b93f854b9cf4d8cb2a7969351",
+	"public_download_verification": {
+		"anonymous_http_status": 200,
+		"downloaded_size_matches": true,
+		"downloaded_sha256_matches": true,
+		"downloaded_bytes_match_built_apk": true,
+		"downloaded_apk_signature_verified": true
+	},
+	"packaged_sdk": { "min": 26, "target": 36, "compile": 36 },
+	"build_variant_input": "TMPDIR contains fdroid.bool=false; otherwise the existing hook defaults to target SDK 28",
+	"previous_artifact": {
+		"branch": "test/tablet-apk",
+		"head_unchanged": "1af52afa78bc267f8d774b846a7aa7bb8f0fe656",
+		"sha256_unchanged": "d4bb10db18b664cd74b10ecfa723e4c8f43687cea41af92fe8f8cf06fece4bfb"
+	},
+	"android_device_and_upgrade_tests": "pending",
+	"ssh_production_release_gate": "BLOCKED"
+}
