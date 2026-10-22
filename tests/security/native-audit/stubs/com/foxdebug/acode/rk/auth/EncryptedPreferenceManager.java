@@ -10,6 +10,7 @@ public class EncryptedPreferenceManager {
     private static final Map<String, Map<String, String>> STORES = new HashMap<>();
     public static String lastNamespace;
     public static boolean lastAllowPlaintextFallback;
+    public static boolean failInitialization;
     private final Map<String, String> store;
 
     public EncryptedPreferenceManager(Context context, String namespace) {
@@ -19,6 +20,9 @@ public class EncryptedPreferenceManager {
     public EncryptedPreferenceManager(Context context, String namespace, boolean fallback) {
         lastNamespace = namespace;
         lastAllowPlaintextFallback = fallback;
+        if (failInitialization && !fallback) {
+            throw new IllegalStateException("Dummy encrypted storage failure");
+        }
         store = STORES.computeIfAbsent(namespace, ignored -> new HashMap<>());
     }
 

@@ -17,11 +17,12 @@ Only dummy records are used. Android Context, Cordova callbacks and preference
 storage are test doubles: this does not exercise Android Keystore, encryption,
 the Cordova Java bridge, an APK, a device, or SSH networking.
 
-One check is a negative control; three intentionally reproduce known defects.
-A successful run means those defects are still reproducible, NOT that the code
-is secure. These are characterization tests, not a passing production gate.
-When fixing a defect, update its assertion to require rejection/revocation and
-add Android runtime coverage. Do not weaken a check merely to retain a green run.
+On this hardening branch, the harness requires rejection of reserved/invalid
+identifiers, separate stores, working CRUD, fail-closed behavior, manifest
+validation, and token/capability revocation on reset/destroy. These are now
+regression assertions for the fixes, not successful exploit assertions. The
+historical tablet-source branch retains the earlier characterization harness.
+This does not validate actual encrypted Android storage or native caller identity.
 
 See [the audit report](../../../security/tablet-ssh-audit.md) for the combined
 JS/native evidence and remaining device checks.

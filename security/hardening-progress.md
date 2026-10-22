@@ -30,3 +30,16 @@ The public download branch still serves SHA-256
 `d4bb10db18b664cd74b10ecfa723e4c8f43687cea41af92fe8f8cf06fece4bfb`.
 New local build outputs are not replacements for that APK. Do not publish a new
 test binary without a new source/validation record and clear test instructions.
+
+## Stage 2: plugin secret namespace and lifecycle
+
+- Reject app-owned and invalid identifiers before issuing a plugin token.
+- Derive an independent, filename-safe encrypted store name from the plugin ID;
+  all four operations share a strict accessor. No arbitrary legacy-store reads.
+- Serialize action dispatch with reset, and revoke on destruction as well.
+- Java harness: 30 native regression assertions passed. Unlike the historical
+  characterization, these assertions now require rejection/revocation.
+- Existing JS privilege-delegation characterizations still reproduce the
+  unresolved shared-realm defects; the isolation release check remains red.
+- Plugin secret storage has a compatibility cutover; see
+  [plugin-secret-storage.md](plugin-secret-storage.md) before installing a new APK.

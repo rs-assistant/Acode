@@ -28,6 +28,7 @@ public class Tee extends CordovaPlugin {
     // token : list of permissions
     private final Map<String, List<String>> permissionStore = new ConcurrentHashMap<>();
     private static final Set<String> SFTP_CAPABILITIES = ConcurrentHashMap.newKeySet();
+    private static final String PLUGIN_STORE_PREFIX = "acode_plugin_secrets_v1_";
 
     // Trusted session established by the plugin loader before any plugin runs.
     // Only requests carrying this secret are allowed to request tokens.
@@ -61,7 +62,7 @@ public class Tee extends CordovaPlugin {
     }
 
     @Override
-    public boolean execute(String action, JSONArray args, CallbackContext callback)
+    public synchronized boolean execute(String action, JSONArray args, CallbackContext callback)
             throws JSONException {
 
         if ("establishConnection".equals(action)) {
@@ -86,6 +87,10 @@ public class Tee extends CordovaPlugin {
                 return true;
             }
 
+            if (!isAllowedPluginId(pluginId)) {
+                callback.error("INVALID_PLUGIN_ID");
+                return true;
+            }
             handleTokenRequest(pluginId, pluginJson, callback);
             return true;
         }
@@ -117,7 +122,7 @@ public class Tee extends CordovaPlugin {
             }
 
             EncryptedPreferenceManager prefs =
-                    new EncryptedPreferenceManager(context, pluginId, false);
+                    pluginSecretStore(pluginId);
 
             String value = prefs.getString(key, defaultValue);
             callback.success(value);
@@ -137,7 +142,7 @@ public class Tee extends CordovaPlugin {
             }
 
             EncryptedPreferenceManager prefs =
-                    new EncryptedPreferenceManager(context, pluginId, false);
+                    pluginSecretStore(pluginId);
 
             prefs.setString(key, value);
             callback.success();
@@ -156,7 +161,7 @@ public class Tee extends CordovaPlugin {
             }
 
             EncryptedPreferenceManager prefs =
-                    new EncryptedPreferenceManager(context, pluginId, false);
+                    pluginSecretStore(pluginId);
 
             prefs.remove(key);
             callback.success();
@@ -174,7 +179,7 @@ public class Tee extends CordovaPlugin {
             }
 
             EncryptedPreferenceManager prefs =
-                    new EncryptedPreferenceManager(context, pluginId, false);
+                    pluginSecretStore(pluginId);
 
             prefs.clear();
             callback.success();
@@ -229,6 +234,34 @@ public class Tee extends CordovaPlugin {
         return false;
     }
 
+
+    @Override
+    public void onDestroy() {
+        onReset();
+        super.onDestroy();
+    }
+
+    private static boolean isAllowedPluginId(String pluginId) {
+        // A plugin identifier must not name an app-owned store or filesystem path.
+        return pluginId != null
+                && pluginId.matches("[A-Za-z0-9][A-Za-z0-9._-]{0,199}")
+                && !pluginId.startsWith("acode_");
+    }
+
+    private EncryptedPreferenceManager pluginSecretStore(String pluginId) {
+        if (!isAllowedPluginId(pluginId)) {
+            throw new IllegalArgumentException("Invalid plugin identifier");
+        }
+        try {
+            byte[] digest = MessageDigest.getInstance("SHA-256")
+                    .digest(pluginId.getBytes(StandardCharsets.UTF_8));
+            // Reading an arbitrary legacy store here would reopen app-store access.
+            return new EncryptedPreferenceManager(context,
+                    PLUGIN_STORE_PREFIX + toHex(digest), false);
+        } catch (java.security.NoSuchAlgorithmException error) {
+            throw new IllegalStateException("Plugin secret storage is unavailable", error);
+        }
+    }
 
     private String getPluginIdFromToken(String token) {
         for (Map.Entry<String, String> entry : tokenStore.entrySet()) {

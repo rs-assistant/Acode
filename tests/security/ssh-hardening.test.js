@@ -53,11 +53,12 @@ describe("SSH security invariants (source-level regression checks)", () => {
 		const tee = read("src/plugins/pluginContext/src/android/Tee.java");
 		const secretStoreCalls =
 			tee.match(
-				/new EncryptedPreferenceManager\(context, pluginId(?:, false)?\)/g,
+				/EncryptedPreferenceManager prefs =\s*pluginSecretStore\(pluginId\)/g,
 			) ?? [];
 		expect(secretStoreCalls).toHaveLength(4);
-		expect(secretStoreCalls.every((call) => call.endsWith(", false)"))).toBe(
-			true,
+		expect(tee).toContain("PLUGIN_STORE_PREFIX + toHex(digest), false)");
+		expect(tee).not.toContain(
+			"new EncryptedPreferenceManager(context, pluginId",
 		);
 	});
 
@@ -65,7 +66,7 @@ describe("SSH security invariants (source-level regression checks)", () => {
 		const tee = read("src/plugins/pluginContext/src/android/Tee.java");
 		const reset = tee.slice(
 			tee.indexOf("public void onReset()"),
-			tee.indexOf("public boolean execute("),
+			tee.search(/public (?:synchronized )?boolean execute\(/),
 		);
 		expect(reset).toContain("sessionId = null");
 		expect(reset).toContain("tokenStore.clear()");
