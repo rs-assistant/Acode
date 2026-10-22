@@ -67,3 +67,22 @@ Four new hook tests execute the real script with temporary filesystem fixtures.
 Actual APK inspection is still necessary; tests alone are not package metadata.
 
 Production credential approval remains [BLOCKED](SSH_PRODUCTION_RELEASE_BLOCKED.md).
+
+## Tablet test build
+
+[Download the storage-hardening test APK](https://github.com/rs-assistant/Acode/raw/refs/heads/test/ssh-safe-storage-20261022/acode-ssh-storage-8be13af6-debug.apk).
+Exact runtime source `8be13af683dc8b353dda082aa1971ba34c374edd`, artifact-only
+commit `178b2737fb699398278eab7c5c836eec28c9c351`; SHA-256
+`692e7f52489f6f41fbd848e532202f0678293d62cab92ff4b557064ea7c7c137`.
+Anonymous HTTP 200 download matched all built bytes and verified with apksigner.
+All previous download branches and main remain unchanged. The package/version
+and Debug certificate match the earlier builds; no storage format migration is
+introduced, but actual tablet upgrade is still pending. Do not uninstall on a
+signature conflict. See [provenance and verification](ssh-storage-apk-publication.json).
+
+Test with an additional disposable key/profile, keeping the original login and
+keys intact. After confirmed successful key authentication, delete only the
+disposable local key, disconnect its existing sessions, then initiate a fresh
+connection: it must fail without password fallback. Separately remove its server
+public key when finished. Do not deliberately fill tablet storage to trigger
+write failures; no connected Android device is available for agent-run tests.

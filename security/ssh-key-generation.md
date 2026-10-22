@@ -113,3 +113,5 @@ Public download verification is not Android generation/Keystore/login testing.
 
 Subsequent [tablet feedback](tablet-test-feedback.md) reports basic functional
 success. It does not close the outstanding adversarial/deletion/failure checks.
+The newer [storage-hardening test build](storage-failure-hardening.md#tablet-test-build)
+retains this feature and the same identity format; prior downloads are preserved.

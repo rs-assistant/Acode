@@ -192,3 +192,13 @@ test binary without a new source/validation record and clear test instructions.
   success claimed and no account/repository Actions permissions were changed.
 - See [failure model, recovery and validation](storage-failure-hardening.md).
   Production release remains BLOCKED.
+- Clean committed runtime source `8be13af6` rebuilt/signed (11 seconds, all 62
+  tasks up-to-date after the actual native rebuild). Eight native sources match
+  generated Android copies; packaged main.js matches the bundle. No variant flag
+  was supplied, and final APK metadata still reports target 36.
+- Published the separate artifact-only `test/ssh-safe-storage-20261022` at
+  `178b2737`, preserving all four earlier artifact branches, original source
+  snapshot and main. Anonymous public download returned HTTP 200, all bytes/hash
+  matched and the downloaded signature verified. See [publication record](ssh-storage-apk-publication.json).
+- This source's device upgrade/failure/deletion/adversarial acceptance is still
+  pending. Positive earlier key-generation feedback is not reassigned to this APK.

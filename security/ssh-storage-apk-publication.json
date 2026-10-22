@@ -1,0 +1,122 @@
+{
+  "schema_version": 1,
+  "record_type": "local-debug-build-verification-not-signed-attestation",
+  "verification_completed_at_utc": "2026-10-22T18:40:25.701Z",
+  "repository": "rs-assistant/Acode",
+  "source_branch": "security/ssh-native-hardening",
+  "source_commit": "8be13af683dc8b353dda082aa1971ba34c374edd",
+  "source_worktree_clean_at_build": true,
+  "submodules": {
+    "codemirror-lsp-client": "db6930c2b6db67e14978f08ae8f5aeb149d29468"
+  },
+  "toolchain": {
+    "node": "24.19.0",
+    "jdk": "21.0.12.1",
+    "cordova": "13.0.0",
+    "cordova_android": "15.1.0",
+    "rspack": "2.2.0",
+    "android_build_tools": "36.0.0",
+    "gradle_wrapper": "8.14.2",
+    "agp": "8.10.1",
+    "kotlin_gradle_plugin": "2.3.0"
+  },
+  "artifact": {
+    "branch": "test/ssh-safe-storage-20261022",
+    "filename": "acode-ssh-storage-8be13af6-debug.apk",
+    "size_bytes": 45842855,
+    "sha256": "692e7f52489f6f41fbd848e532202f0678293d62cab92ff4b557064ea7c7c137",
+    "package_id": "com.foxdebug.acode",
+    "version_name": "1.13.5",
+    "version_code": 1011,
+    "variant": "paid-debug",
+    "min_sdk": 26,
+    "target_sdk": 36,
+    "compile_sdk": 36,
+    "signing_certificate_sha256": "c6a811233830332c03851f95b3487faa7e4bde3b93f854b9cf4d8cb2a7969351",
+    "bundled_main_js_sha256": "0d21c8db5dbfcdc9d33fba84b0e055532d804b131ef0764e2f028907c153b672"
+  },
+  "build_inputs": {
+    "rspack": "rspack build --mode development",
+    "cordova": "cordova prepare android --nosave",
+    "gradle": "platforms/android/gradlew assembleDebug --no-daemon",
+    "variant_flag": "none; TMPDIR points to a new task-local directory without fdroid.bool",
+    "build_results": "native rebuild 20 seconds, 13/62 tasks executed; clean committed-source repeat 11 seconds, 62 up-to-date"
+  },
+  "native_source_sha256": {
+    "src/plugins/pluginContext/src/android/Tee.java": "ef8d743fd49fd47fb0992d9a5b944bfca1fe1469dd51b87a11926b748c9bdb88",
+    "src/plugins/auth/src/android/EncryptedPreferenceManager.java": "76c1d5d39c713c1c46fe853965c77d804fb9600c9967704a57a8362164be321c",
+    "src/plugins/sftp/src/com/foxdebug/sftp/Sftp.java": "766adfa256983a5d7e9a7214d4dd080394b18b9f61f29be4c38731dfb013fca2",
+    "src/plugins/sftp/src/com/foxdebug/sftp/SftpSecurityStore.java": "7caea426b7c35210a45e16c797031b0794089e0ecdc383e08a288e2a93b0edea",
+    "src/plugins/sftp/src/com/foxdebug/sftp/SftpErrors.java": "3bf8dd966ed2ba43eb19034beadb38ae93fde7012fe8a9b8a4be39b975a14264",
+    "src/plugins/sftp/src/com/foxdebug/sftp/SftpDialogTheme.java": "1d49b0763ab7c4012702cac73df48f624b018ca6411689af4970bb1cf577bc4b",
+    "src/plugins/sftp/src/com/foxdebug/sftp/SshKeyMaterial.java": "684b9c90a115c2b9151015cd2c17cb88d6eb2b229e8cc2cef067cde12d0815fb",
+    "src/plugins/sftp/src/com/foxdebug/sftp/SshIdentityStore.java": "42eaab207583810f089ed8d8bcf82e91bbf9c2552fca173030d98603825f0e11"
+  },
+  "verification": {
+    "vitest_files_passed": 97,
+    "vitest_tests_passed": 888,
+    "typecheck": "passed",
+    "targeted_biome": "passed",
+    "native_core_assertions": 52,
+    "production_preferences_and_sftp_store_assertions": 79,
+    "crypto_and_identity_vault_assertions": 85,
+    "apk_signature": "verified with apksigner",
+    "native_sources_match_generated_copies": true,
+    "packaged_main_js_matches_build_output": true,
+    "packaged_allow_backup": false,
+    "packaged_data_extraction_exclusions": 18,
+    "packaged_uses_cleartext_traffic": true,
+    "android_runtime_for_this_source": "not tested",
+    "remote_ci": "not verified; API returned zero workflows and branch runs",
+    "dependency_audit": {
+      "omit_dev": {
+        "high": 9,
+        "low": 2,
+        "total": 11
+      },
+      "full": {
+        "high": 22,
+        "moderate": 5,
+        "low": 3,
+        "total": 30
+      },
+      "both_exit_codes": 1
+    }
+  },
+  "previous_artifacts_preserved": {
+    "main": "ef7f32656a5c4216209ac7e8d24e81bb1564ff8b",
+    "test/tablet-apk": "1af52afa78bc267f8d774b846a7aa7bb8f0fe656",
+    "test/tablet-apk-source": "76a922d92f5a0ce1c0f70bfd9a129e6204094b31",
+    "test/ssh-safe-apk-20261022": "8cf12bf67e0f0a37984cb2006c1a869f7549a9f1",
+    "test/ssh-safe-apk-20261022-dialog-fix": "c328cac5e436720e66caab2078e6395e25a4344d",
+    "test/ssh-safe-keygen-20261022": "360e9b38b53b891dca6097a4c90f69e5155631d2"
+  },
+  "changes": [
+    "Fail closed across strict preference managers after unconfirmed cache-first commits; synchronous strict writes.",
+    "Check saved-profile deletion durability and report native dialog callback failures.",
+    "Preserve configured target SDK when no explicit F-Droid flag is supplied; reject malformed flags.",
+    "Expanded production-class failure and real-source plugin-entry regressions."
+  ],
+  "limitations": [
+    "JVM Android/AndroidX adapters do not validate encryption, Keystore, real disk durability or Cordova scheduling.",
+    "Private software keys remain native encrypted records, not hardware-only signing handles; no backup/export.",
+    "No rollback guarantee after failed writes; inspect state after resolving storage failure and restarting process.",
+    "Whole catalog read-modify-write across separate store instances is not transactional.",
+    "In-flight key material and established sessions are not revoked by local deletion or storage failure.",
+    "Same signing certificate/package/version are necessary, not sufficient, proof of actual Android upgrade compatibility.",
+    "Debug signing is not a production release key; source-to-generated Java match is not independent DEX/runtime proof.",
+    "Outstanding dependency findings, malicious-plugin/device, changed-host and deletion/failure checks remain."
+  ],
+  "ssh_production_release_gate": "BLOCKED",
+  "artifact_commit": "178b2737fb699398278eab7c5c836eec28c9c351",
+  "public_download": {
+    "url": "https://github.com/rs-assistant/Acode/raw/refs/heads/test/ssh-safe-storage-20261022/acode-ssh-storage-8be13af6-debug.apk",
+    "anonymous_http_status": 200,
+    "size_bytes": 45842855,
+    "sha256": "692e7f52489f6f41fbd848e532202f0678293d62cab92ff4b557064ea7c7c137",
+    "byte_for_byte_match": true,
+    "downloaded_signature_verified": true
+  },
+  "remote_refs_preserved_after_publication": true,
+  "device_acceptance": "pending for this source; earlier key-generation build has separate positive user feedback"
+}
