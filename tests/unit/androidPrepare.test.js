@@ -12,6 +12,94 @@ const hook = fs.readFileSync(
 	"utf8",
 );
 
+function runHook(root) {
+	return vm.runInNewContext(hook, {
+		__dirname: path.join(root, "hooks"),
+		process: { env: { TMPDIR: root } },
+		console: { log() {}, warn() {}, error() {} },
+		require(id) {
+			if (id === "child_process")
+				return {
+					execSync(command) {
+						expect(command).toBe("npm prefix");
+						return Buffer.from(root);
+					},
+				};
+			return require(id);
+		},
+	});
+}
+
+it.each([
+	undefined,
+	"false",
+])("preserves Cordova's configured target SDK without an explicit F-Droid opt-in (%s)", (flag) => {
+	const root = fs.mkdtempSync(path.join(os.tmpdir(), "acode-target-sdk-"));
+	try {
+		const app = path.join(root, "platforms/android/app");
+		fs.mkdirSync(app, { recursive: true });
+		fs.writeFileSync(path.join(root, "build-extras.gradle"), "// fixture");
+		const gradle = path.join(app, "build.gradle");
+		if (flag !== undefined)
+			fs.writeFileSync(path.join(root, "fdroid.bool"), flag);
+		for (const previous of ["cordovaConfig.SDK_VERSION", "28", "36"]) {
+			fs.writeFileSync(gradle, `android { targetSdkVersion ${previous} }`);
+			runHook(root);
+			expect(fs.readFileSync(gradle, "utf8")).toContain(
+				"targetSdkVersion cordovaConfig.SDK_VERSION",
+			);
+		}
+	} finally {
+		fs.rmSync(root, { recursive: true, force: true });
+	}
+});
+
+it("keeps the legacy F-Droid SDK override explicit and reverses it on the next paid prepare", () => {
+	const root = fs.mkdtempSync(path.join(os.tmpdir(), "acode-fdroid-sdk-"));
+	try {
+		const app = path.join(root, "platforms/android/app");
+		fs.mkdirSync(app, { recursive: true });
+		fs.writeFileSync(path.join(root, "build-extras.gradle"), "// fixture");
+		const gradle = path.join(app, "build.gradle");
+		const flag = path.join(root, "fdroid.bool");
+		fs.writeFileSync(
+			gradle,
+			"android { targetSdkVersion cordovaConfig.SDK_VERSION }",
+		);
+		fs.writeFileSync(flag, "true\n");
+		runHook(root);
+		expect(fs.readFileSync(gradle, "utf8")).toContain("targetSdkVersion 28");
+		fs.unlinkSync(flag);
+		runHook(root);
+		expect(fs.readFileSync(gradle, "utf8")).toContain(
+			"targetSdkVersion cordovaConfig.SDK_VERSION",
+		);
+	} finally {
+		fs.rmSync(root, { recursive: true, force: true });
+	}
+});
+
+it("rejects a malformed flavour flag without silently changing the target SDK", () => {
+	const root = fs.mkdtempSync(path.join(os.tmpdir(), "acode-invalid-sdk-"));
+	try {
+		const app = path.join(root, "platforms/android/app");
+		fs.mkdirSync(app, { recursive: true });
+		fs.writeFileSync(path.join(root, "build-extras.gradle"), "// fixture");
+		const gradle = path.join(app, "build.gradle");
+		fs.writeFileSync(
+			gradle,
+			"android { targetSdkVersion cordovaConfig.SDK_VERSION }",
+		);
+		fs.writeFileSync(path.join(root, "fdroid.bool"), "invalid");
+		expect(() => runHook(root)).toThrow("Invalid fdroid.bool");
+		expect(fs.readFileSync(gradle, "utf8")).toContain(
+			"targetSdkVersion cordovaConfig.SDK_VERSION",
+		);
+	} finally {
+		fs.rmSync(root, { recursive: true, force: true });
+	}
+});
+
 it("refreshes stale System plugin Java alongside icons on repeated Android prepares", () => {
 	const root = fs.mkdtempSync(path.join(os.tmpdir(), "acode-prepare-"));
 	const write = (file, content) => {
@@ -55,22 +143,7 @@ it("refreshes stale System plugin Java alongside icons on repeated Android prepa
 			"platforms/android/app/src/main/java/other/Plugin.java",
 			"// other plugin",
 		);
-		const prepare = () =>
-			vm.runInNewContext(hook, {
-				__dirname: path.join(root, "hooks"),
-				process: { env: { TMPDIR: root } },
-				console: { log() {}, warn() {}, error() {} },
-				require(id) {
-					if (id === "child_process")
-						return {
-							execSync(command) {
-								expect(command).toBe("npm prefix");
-								return Buffer.from(root);
-							},
-						};
-					return require(id);
-				},
-			});
+		const prepare = () => runHook(root);
 		prepare();
 		const preparedManifest = fs.readFileSync(manifest, "utf8");
 		const application = parse(preparedManifest).find("application");

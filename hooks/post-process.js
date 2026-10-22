@@ -124,33 +124,23 @@ function patchTargetSdkVersion() {
   const sdkRegex = /targetSdkVersion\s+(cordovaConfig\.SDK_VERSION|\d+)/;
 
   if (sdkRegex.test(content)) {
-    let api = "36";
+    // Respect config.xml through Cordova's generated configuration. A missing
+    // temporary flavour flag must never silently lower Android's protections.
+    // Restore the expression on repeat prepares after a legacy F-Droid build.
+    let api = "cordovaConfig.SDK_VERSION";
     const tmp = getTmpDir();
-    if (tmp == null) {
-      console.warn("---------------------------------------------------------------------------------\n\n\n\n");
-      console.warn(`⚠️ fdroid.bool not found`);
-      console.warn("⚠️ Fdroid flavour will be built");
-      api = "28";
-      console.warn("\n\n\n\n---------------------------------------------------------------------------------");
-    } else {
-      const froidFlag = path.join(getTmpDir(), 'fdroid.bool');
-
-      if (fs.existsSync(froidFlag)) {
-        const fdroid = fs.readFileSync(froidFlag, 'utf-8').trim();
-        if (fdroid == "true") {
+    if (tmp !== null) {
+      const fdroidFlag = path.join(tmp, 'fdroid.bool');
+      if (fs.existsSync(fdroidFlag)) {
+        const fdroid = fs.readFileSync(fdroidFlag, 'utf-8').trim();
+        if (fdroid === "true") {
           api = "28";
+          console.warn('[Cordova Hook] Explicit legacy F-Droid target SDK 28 override');
+        } else if (fdroid !== "false") {
+          throw new Error('Invalid fdroid.bool; expected true or false');
         }
-      } else {
-        console.warn("---------------------------------------------------------------------------------\n\n\n\n");
-        console.warn(`⚠️ fdroid.bool not found`);
-        console.warn("⚠️ Fdroid flavour will be built");
-        api = "28";
-        console.warn("\n\n\n\n---------------------------------------------------------------------------------");
-        //process.exit(1);
       }
     }
-
-
     content = content.replace(sdkRegex, 'targetSdkVersion ' + api);
     fs.writeFileSync(gradleFile, content, 'utf-8');
     console.log('[Cordova Hook] ✅ Patched targetSdkVersion to ' + api);
