@@ -1,0 +1,37 @@
+{
+	"recorded_date": "2026-10-22",
+	"source_commit": "ffb1bfd1764a96e2b04b44a96b3c9c554cd7595d",
+	"artifact_branch": "test/ssh-safe-apk-20261022-dialog-fix",
+	"artifact_commit": "c328cac5e436720e66caab2078e6395e25a4344d",
+	"filename": "acode-ssh-safe-ffb1bfd1-debug.apk",
+	"download_url": "https://github.com/rs-assistant/Acode/raw/refs/heads/test/ssh-safe-apk-20261022-dialog-fix/acode-ssh-safe-ffb1bfd1-debug.apk",
+	"provenance_url": "https://github.com/rs-assistant/Acode/blob/c328cac5e436720e66caab2078e6395e25a4344d/PROVENANCE.json",
+	"instructions_url": "https://github.com/rs-assistant/Acode/blob/c328cac5e436720e66caab2078e6395e25a4344d/README.md",
+	"size_bytes": 45842546,
+	"sha256": "2f0e90c27b9940c889024de73439109c55a5932a6ab6aab9cac5d33cb1e486d2",
+	"signing_certificate_sha256": "c6a811233830332c03851f95b3487faa7e4bde3b93f854b9cf4d8cb2a7969351",
+	"package_id": "com.foxdebug.acode",
+	"version_name": "1.13.5",
+	"version_code": 1011,
+	"target_sdk": 36,
+	"public_download_verification": {
+		"anonymous_http_status": 200,
+		"downloaded_size_and_sha256_match": true,
+		"downloaded_bytes_match_built_apk": true,
+		"downloaded_apk_signature_verified": true
+	},
+	"previous_branches_unchanged": {
+		"test/tablet-apk": "1af52afa78bc267f8d774b846a7aa7bb8f0fe656",
+		"test/ssh-safe-apk-20261022": "8cf12bf67e0f0a37984cb2006c1a869f7549a9f1"
+	},
+	"tests": {
+		"vitest_files_passed": 95,
+		"vitest_tests_passed": 845,
+		"native_assertions_passed": 51,
+		"typecheck": "passed",
+		"android_debug_build": "passed",
+		"real_device_dialog_rendering": "pending",
+		"real_device_private_key_login": "pending"
+	},
+	"ssh_production_release_gate": "BLOCKED"
+}

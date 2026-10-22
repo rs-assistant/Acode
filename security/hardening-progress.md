@@ -121,3 +121,21 @@ test binary without a new source/validation record and clear test instructions.
   confirmed unchanged. See [publication record](ssh-safe-tablet-publication.json).
 - Production release remains BLOCKED. Only dummy-credential tablet testing is
   requested; dependency findings, device/upgrade and adversarial tests remain open.
+
+## Stage 7: tablet-reported invisible security-dialog actions
+
+- User reports safe-mode notice, ordinary editing and a connection working, but
+  host-key dialog buttons invisible; private-key instructions were requested.
+  Record these narrowly, not as completion of transfer/terminal/adversarial tests.
+- Trace the white global accent inherited by native framework alerts. Use an
+  explicit native Material light/dark alert theme for unknown-host, changed-key
+  and saved-profile-deletion dialogs; trust/cancel/host-key comparison is unchanged.
+- Local tests: 95 files / 845 JS tests, typecheck, 34 + 11 + 6 native assertions
+  passed. Theme-selector tests do not render UI. Android native rebuild/signature
+  passed, then rebuild from clean committed source `ffb1bfd1` passed again.
+- Publish a separate dialog-fix APK, with source/signature/provenance records;
+  anonymous HTTP 200 download matches all built bytes and verifies with apksigner.
+  Both earlier APK download branches remain unchanged. See
+  [feedback, key-auth instructions and artifact](tablet-dialog-and-key-auth.md).
+- Await actual tablet rendering and test-key login results; no production SSH
+  release approval or new real-device success is claimed.

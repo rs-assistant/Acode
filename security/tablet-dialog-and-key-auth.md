@@ -54,3 +54,14 @@ test build. Importing a key does not remove the original key file from the
 tablet's filesystem; protect that original copy too. Do not erase trusted-host
 records merely to recreate the dialog. A new controlled test endpoint can be
 used for testing unknown-host prompts without changing an existing trust record.
+
+## Separate dialog-fix test APK
+
+[Download the dialog-fix APK](https://github.com/rs-assistant/Acode/raw/refs/heads/test/ssh-safe-apk-20261022-dialog-fix/acode-ssh-safe-ffb1bfd1-debug.apk).
+Exact runtime source is `ffb1bfd1764a96e2b04b44a96b3c9c554cd7595d`; the
+artifact-only commit is `c328cac5e436720e66caab2078e6395e25a4344d`.
+See [the publication record](ssh-dialog-apk-publication.json) and its pinned
+provenance/instructions. Anonymous public download returned HTTP 200 and matched
+the built APK byte-for-byte; its signature was reverified. Both earlier tablet
+download branches remain unchanged. Actual dialog visibility, upgrade and
+private-key authentication still require user/device confirmation.
