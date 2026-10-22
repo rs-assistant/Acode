@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "record_type": "local-debug-build-verification-not-signed-attestation",
+  "recorded_date": "2026-10-22",
+  "user_timezone": "Asia/Taipei",
+  "verification_completed_at_utc": "2026-10-22T09:27:30Z",
+  "repository": "rs-assistant/Acode",
+  "source_branch": "security/ssh-native-hardening",
+  "source_commit": "e1b32fc7e72dd0a36cea1454338f4be3fbbfa38c",
+  "source_worktree_clean_at_build": true,
+  "submodules": {
+    "codemirror-lsp-client": "db6930c2b6db67e14978f08ae8f5aeb149d29468"
+  },
+  "artifact": {
+    "branch": "test/ssh-safe-apk-20261022",
+    "filename": "acode-ssh-safe-e1b32fc7-debug.apk",
+    "size_bytes": 45842546,
+    "sha256": "f2ce0277a237afcefb27bcbc92a676a5e6ffb84f7a15adbdaf19657c4bfae0b5",
+    "package_id": "com.foxdebug.acode",
+    "version_name": "1.13.5",
+    "version_code": 1011,
+    "variant": "paid-debug",
+    "min_sdk": 26,
+    "target_sdk": 36,
+    "compile_sdk": 36,
+    "signing_certificate_sha256": "c6a811233830332c03851f95b3487faa7e4bde3b93f854b9cf4d8cb2a7969351",
+    "bundled_main_js_sha256": "dcdfc8efb051c11197674cdb9197c51208626cbb3b61cd1a12f926f9ba4ee8b7"
+  },
+  "previous_tablet_artifact_preserved": {
+    "branch": "test/tablet-apk",
+    "branch_head": "1af52afa78bc267f8d774b846a7aa7bb8f0fe656",
+    "sha256": "d4bb10db18b664cd74b10ecfa723e4c8f43687cea41af92fe8f8cf06fece4bfb",
+    "same_package_version_code_and_signing_certificate": true,
+    "actual_android_upgrade_tested": false
+  },
+  "build_inputs": {
+    "rspack": "rspack build --mode development",
+    "cordova": "cordova prepare android --nosave",
+    "gradle": "platforms/android/gradlew assembleDebug --no-daemon",
+    "variant_flag": "TMPDIR points to a task-local directory containing fdroid.bool with false",
+    "variant_warning": "Without this flag hooks/post-process.js defaults to target SDK 28; only the inspected target-36 APK is distributed."
+  },
+  "toolchain": {
+    "node": "24.19.0",
+    "jdk": "21.0.12.1",
+    "cordova": "13.0.0",
+    "cordova_android": "15.1.0",
+    "rspack": "2.2.0",
+    "android_build_tools": "36.0.0",
+    "gradle_wrapper": "8.14.2",
+    "agp": "8.10.1",
+    "kotlin_gradle_plugin": "2.3.0"
+  },
+  "native_source_sha256": {
+    "src/plugins/pluginContext/src/android/Tee.java": "ef8d743fd49fd47fb0992d9a5b944bfca1fe1469dd51b87a11926b748c9bdb88",
+    "src/plugins/sftp/src/com/foxdebug/sftp/Sftp.java": "f04d9c9a65b1c7b424dfead58b91c6f7c01bd31e041dd08bcb10c8868bda5b74",
+    "src/plugins/sftp/src/com/foxdebug/sftp/SftpErrors.java": "3bf8dd966ed2ba43eb19034beadb38ae93fde7012fe8a9b8a4be39b975a14264",
+    "src/plugins/sftp/src/com/foxdebug/sftp/SftpSecurityStore.java": "9d5fa6a6bb1b658e42d7d6d114bf9db8de93c23f3aa16cab94c677eff3ed09fe",
+    "src/plugins/auth/src/android/EncryptedPreferenceManager.java": "6daaaf06261359e7c95592e2ab4db8d74245a514fb82ae4fe5a808f61fae3abf"
+  },
+  "verification": {
+    "vitest_files_passed": 95,
+    "vitest_tests_passed": 844,
+    "tee_native_assertions_passed": 34,
+    "error_native_assertions_passed": 11,
+    "typecheck": "passed",
+    "android_build": "passed; 11 seconds; 62 tasks, 5 executed and 57 up-to-date",
+    "apk_signature": "verified with apksigner",
+    "packaged_main_js_matches_build_output": true,
+    "listed_native_sources_match_generated_android_copies": true,
+    "packaged_allow_backup": false,
+    "packaged_data_extraction_exclusions": 18,
+    "packaged_uses_cleartext_traffic": true,
+    "native_policy": "read-only ssh-safe, thirdPartyPluginsAllowed=false",
+    "android_runtime": "not tested",
+    "real_device_upgrade": "not tested",
+    "remote_ci": "no runs observed"
+  },
+  "limitations": [
+    "Use dummy SSH credentials only; dependency findings and runtime validation remain open.",
+    "Matching generated Java sources does not independently verify DEX behavior.",
+    "Same signing certificate and package metadata are necessary, not sufficient, proof of upgrade compatibility.",
+    "Third-party plugin secrets are not automatically migrated from arbitrary legacy namespaces.",
+    "The Debug signing key is not a production release key; byte-identical rebuilds are not guaranteed."
+  ],
+  "ssh_production_release_gate": "BLOCKED"
+}
