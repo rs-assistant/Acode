@@ -6,7 +6,8 @@ Run from the repository root with JDK 21, curl, and sha256sum:
 bash tests/security/native-audit/run.sh
 ```
 
-The script compiles the current application's `Tee.java` and `SftpErrors.java`, unchanged, together
+The script compiles the current application's `Tee.java`, `SftpErrors.java` and
+`SftpDialogTheme.java`, unchanged, together
 with the adapters under `stubs/` and the pinned org.json 20240303 jar. The first
 run downloads that jar from Maven Central over verified TLS and checks its
 SHA-256. Compiled classes and dependency cache stay outside the checkout.
@@ -28,6 +29,12 @@ It also checks the read-only safe-edition policy and fixed error categories usin
 dummy secret-bearing exceptions, including exceptions that throw if their raw
 message/string is read. CI has an independent JDK 21 job for this harness; a
 workflow committed to the fork does not itself prove GitHub executed that job.
+
+Six theme-selection assertions cover light, dark and undefined night modes,
+including unrelated UI-mode flags. `android.R` values are symbolic test adapters;
+this checks selector logic, not actual framework colors or rendered button
+visibility. The Android build checks the real framework resource identifiers;
+light/dark mode, tablet window sizes and large-font rendering still need a device.
 
 See [the audit report](../../../security/tablet-ssh-audit.md) for the combined
 JS/native evidence and remaining device checks.

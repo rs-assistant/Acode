@@ -135,6 +135,28 @@ describe("SSH security invariants (source-level regression checks)", () => {
 		);
 		expect(sftp).toContain('"HOST_KEY_CHANGED"');
 	});
+
+	it("uses explicit native day/night themes for all security dialogs", () => {
+		const sftp = read("src/plugins/sftp/src/com/foxdebug/sftp/Sftp.java");
+		const theme = read(
+			"src/plugins/sftp/src/com/foxdebug/sftp/SftpDialogTheme.java",
+		);
+		expect(sftp.match(/new AlertDialog\.Builder\(/g)).toHaveLength(1);
+		expect(
+			sftp.match(/= securityDialogBuilder\(\)|\n\s*securityDialogBuilder\(\)/g),
+		).toHaveLength(3);
+		expect(sftp).toContain(
+			"SftpDialogTheme.forUiMode(activity.getResources().getConfiguration().uiMode)",
+		);
+		expect(theme).toContain("android.R.style.Theme_Material_Dialog_Alert");
+		expect(theme).toContain(
+			"android.R.style.Theme_Material_Light_Dialog_Alert",
+		);
+		expect(sftp).toContain(
+			'.setNegativeButton("Cancel", (ignored, which) -> decision.countDown())',
+		);
+		expect(sftp).toContain('"Trust and connect"');
+	});
 });
 
 describe("SSH authorization boundary", () => {

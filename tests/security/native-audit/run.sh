@@ -21,7 +21,10 @@ javac -cp "$acode_json" -d "$acode_classes" \
   "${acode_stubs[@]}" \
   "$acode_repo/src/plugins/pluginContext/src/android/Tee.java" \
   "$acode_repo/src/plugins/sftp/src/com/foxdebug/sftp/SftpErrors.java" \
+  "$acode_repo/src/plugins/sftp/src/com/foxdebug/sftp/SftpDialogTheme.java" \
   "$acode_fixture/TeeAudit.java" \
-  "$acode_fixture/SftpErrorsAudit.java"
+  "$acode_fixture/SftpErrorsAudit.java" \
+  "$acode_fixture/SftpDialogThemeAudit.java"
 java -cp "$acode_classes:$acode_json" TeeAudit
 java -cp "$acode_classes:$acode_json" com.foxdebug.sftp.SftpErrorsAudit
+java -cp "$acode_classes:$acode_json" com.foxdebug.sftp.SftpDialogThemeAudit

@@ -449,6 +449,15 @@ public class Sftp extends CordovaPlugin {
     return error;
   }
 
+  private AlertDialog.Builder securityDialogBuilder() {
+    // The activity uses a white accent for its own controls. Inheriting it in
+    // a light framework AlertDialog makes the security action labels invisible.
+    return new AlertDialog.Builder(
+      activity,
+      SftpDialogTheme.forUiMode(activity.getResources().getConfiguration().uiMode)
+    );
+  }
+
   private boolean confirmUnknownHost(
     String endpoint,
     String algorithm,
@@ -460,7 +469,7 @@ public class Sftp extends CordovaPlugin {
     AtomicBoolean trusted = new AtomicBoolean(false);
     activity.runOnUiThread(
       () -> {
-        AlertDialog dialog = new AlertDialog.Builder(activity)
+        AlertDialog dialog = securityDialogBuilder()
           .setTitle("Unknown SSH host")
           .setMessage(
             "This is the first connection to " +
@@ -496,7 +505,7 @@ public class Sftp extends CordovaPlugin {
     if (activity == null || activity.isFinishing()) return;
     activity.runOnUiThread(
       () ->
-        new AlertDialog.Builder(activity)
+        securityDialogBuilder()
           .setTitle("SSH host key changed")
           .setMessage(
             "The identity of " +
@@ -875,7 +884,7 @@ public class Sftp extends CordovaPlugin {
       String label = profile.optString("username") + "@" + profile.optString("hostname");
       activity.runOnUiThread(
         () -> {
-          AlertDialog confirmation = new AlertDialog.Builder(activity)
+          AlertDialog confirmation = securityDialogBuilder()
             .setTitle("Delete saved SSH credentials?")
             .setMessage(
               "Remove the encrypted SFTP/SSH profile for " + label + "?"
