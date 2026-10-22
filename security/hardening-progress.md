@@ -139,3 +139,30 @@ test binary without a new source/validation record and clear test instructions.
   [feedback, key-auth instructions and artifact](tablet-dialog-and-key-auth.md).
 - Await actual tablet rendering and test-key login results; no production SSH
   release approval or new real-device success is claimed.
+
+## Stage 8: user-requested on-device SSH identity generation
+
+- Review Android SSHBorg at commit `1388c99d` as a workflow reference; independently
+  implement the feature with the existing Maverick/BC stack, without copying GPL
+  source or allowing optional/plaintext credential storage.
+- File Browser + → SSH keys generates native Ed25519/RSA-4096, displays/copies
+  only public metadata, and lets SFTP/SSH profiles select an opaque saved identity
+  ID. Strict native encrypted vault, synchronous commits, 32-key cap, and no
+  private-key export. Existing password/file-key authentication is retained.
+- Native-confirmed local deletion does not revoke server authorization, in-flight
+  handshakes or established sessions. Loss/recovery, backup and server public-key
+  installation instructions are explicit; no automatic remote writes are made.
+- Final full JS suite: 97 files / 866 tests passed; typecheck, targeted Biome and
+  diff checks passed. One existing JSDoc folding test failed under a concurrent
+  Android build; the final uncontended full suite passed without changing it.
+- Native core: 35 + 11 + 6 assertions passed. Real-library crypto/vault harness:
+  55 assertions passed, including both algorithms' sign/verify and OpenSSH public
+  parsing/fingerprint checks. Android storage remains an adapter in those tests.
+- Clean committed source `96a37beb` builds/signs successfully, min/target/compile
+  26/36/36. All eight recorded native sources match generated copies; packaged
+  main.js matches the build output. This is not independent runtime/DEX proof.
+- Separate artifact branch `test/ssh-safe-keygen-20261022` at `360e9b38`; anonymous
+  HTTP 200 download, byte/hash match and signature verified. Prior three APK
+  branches and main are unchanged. See [design and download](ssh-key-generation.md).
+- Real tablet generation, key-authenticated SFTP/shell, Keystore, delete/restart
+  and old-profile regression checks remain pending; production release is BLOCKED.

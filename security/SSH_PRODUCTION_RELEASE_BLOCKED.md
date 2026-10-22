@@ -15,6 +15,9 @@ This branch is **not approved for production SSH credentials**.
 - [x] Trace the actual Plugin Loader implementation and identify its JS realm and Cordova API exposure.
 - [x] Implement the user-approved alternative: immutable native safe-edition policy and fail-closed blocking of all third-party plugin execution, with JS/native regressions. This is not shared-realm native caller authentication.
 - [ ] Verify remote exec, upload, download, and shell paths against a malicious test plugin.
+- [ ] Verify new on-device key generation, real Keystore persistence, public-key copy,
+      saved-identity SFTP/shell login, deletion/restart and old-profile compatibility
+      on Android; actual-library JVM crypto tests do not close this requirement.
 - [x] Inspect built APK backup/data extraction and network flags. Cleartext remains enabled for existing localhost preview/terminal compatibility; a network-policy redesign is not claimed.
 - [ ] Run dependency scans, CI tests, and Android emulator/device tests.
 - [ ] Review the patch and document residual risks.

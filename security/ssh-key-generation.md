@@ -96,3 +96,13 @@ The [production release gate](SSH_PRODUCTION_RELEASE_BLOCKED.md) remains BLOCKED
 Use disposable test accounts/keys until tablet generation, public-key copy,
 key-authenticated SFTP/shell, reboots, deletion and old-profile regression checks
 are completed. No production credentials or real server were used in local tests.
+
+## Tablet test download
+
+[Download the key-generation APK](https://github.com/rs-assistant/Acode/raw/refs/heads/test/ssh-safe-keygen-20261022/acode-ssh-keygen-96a37beb-debug.apk).
+Exact runtime source is `96a37bebb99ae0478b25811d68944fd404d36dd1`, artifact-only
+commit `360e9b38b53b891dca6097a4c90f69e5155631d2`. See the
+[publication record](ssh-keygen-apk-publication.json). An anonymous public fetch
+returned HTTP 200 and matched all built bytes; the downloaded signature was
+verified. All three previous tablet artifact branches and main remain unchanged.
+Public download verification is not Android generation/Keystore/login testing.
