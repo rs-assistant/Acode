@@ -66,6 +66,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import com.foxdebug.acode.rk.plugin.Tee;
 
 public class Sftp extends CordovaPlugin {
 
@@ -932,6 +933,16 @@ public class Sftp extends CordovaPlugin {
     JSONArray args,
     CallbackContext callback
   ) {
+    if (args == null || args.length() == 0 || !Tee.isSftpCapability(args.optString(0))) {
+      callback.error("SFTP authorization required");
+      return true;
+    }
+
+    JSONArray authorizedArgs = new JSONArray();
+    for (int i = 1; i < args.length(); i++) {
+      authorizedArgs.put(args.opt(i));
+    }
+
     if (!isAllowedAction(action)) {
       callback.error("SFTP action is not available: " + action);
       return false;
@@ -941,7 +952,7 @@ public class Sftp extends CordovaPlugin {
         .getDeclaredMethod(action, JSONArray.class, CallbackContext.class);
 
       if (method != null) {
-        method.invoke(this, args, callback);
+        method.invoke(this, authorizedArgs, callback);
         return true;
       }
     } catch (NoSuchMethodException e) {

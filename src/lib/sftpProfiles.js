@@ -1,5 +1,6 @@
 import fsOperation from "fileSystem";
 import Url from "utils/Url";
+import nativeSftp from "./nativeSftp";
 
 const PROFILE_PREFIX = "profile-";
 const MIGRATION_MARKER = "sftpNativeProfileMigration";
@@ -47,7 +48,7 @@ function saveSftpProfile({
 	passPhrase = "",
 }) {
 	return new Promise((resolve, reject) => {
-		sftp.saveProfile(
+		nativeSftp.saveProfile(
 			profileId,
 			hostname,
 			Number.parseInt(port, 10) || 22,
@@ -73,7 +74,7 @@ export function editSftpProfile({
 	passPhrase = "",
 } = {}) {
 	return new Promise((resolve, reject) => {
-		sftp.editProfile(
+		nativeSftp.editProfile(
 			profileId,
 			hostname,
 			Number.parseInt(port, 10) || 22,
@@ -90,13 +91,13 @@ export function editSftpProfile({
 
 export function getSftpProfileInfo(profileId) {
 	return new Promise((resolve, reject) => {
-		sftp.getProfileInfo(profileId, resolve, reject);
+		nativeSftp.getProfileInfo(profileId, resolve, reject);
 	});
 }
 
 export function deleteSftpProfile(profileId) {
 	return new Promise((resolve) => {
-		sftp.deleteProfile(profileId, resolve, resolve);
+		nativeSftp.deleteProfile(profileId, resolve, resolve);
 	});
 }
 

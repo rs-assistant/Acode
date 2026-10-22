@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.Set;
 import android.content.Context;
 import org.apache.cordova.*;
 
@@ -26,6 +27,7 @@ public class Tee extends CordovaPlugin {
 
     // token : list of permissions
     private final Map<String, List<String>> permissionStore = new ConcurrentHashMap<>();
+    private static final Set<String> SFTP_CAPABILITIES = ConcurrentHashMap.newKeySet();
 
     // Trusted session established by the plugin loader before any plugin runs.
     // Only requests carrying this secret are allowed to request tokens.
@@ -49,6 +51,7 @@ public class Tee extends CordovaPlugin {
         // previous trusted session is no longer meaningful. Drop it and let the
         // loader establish a fresh one during the next bootstrap.
         this.sessionId = null;
+        SFTP_CAPABILITIES.clear();
     }
 
     @Override
@@ -78,6 +81,20 @@ public class Tee extends CordovaPlugin {
             }
 
             handleTokenRequest(pluginId, pluginJson, callback);
+            return true;
+        }
+
+        if ("requestSftpCapability".equals(action)) {
+            String session = args.getString(0);
+
+            if (!isValidSession(session)) {
+                callback.error("INVALID_SESSION");
+                return true;
+            }
+
+            String capability = generateSecret();
+            SFTP_CAPABILITIES.add(capability);
+            callback.success(capability);
             return true;
         }
 
@@ -234,6 +251,10 @@ public class Tee extends CordovaPlugin {
     public boolean isTokenValid(String token, String pluginId) {
         String storedToken = tokenStore.get(pluginId);
         return storedToken != null && constantTimeEquals(token, storedToken);
+    }
+
+    public static boolean isSftpCapability(String capability) {
+        return capability != null && SFTP_CAPABILITIES.contains(capability);
     }
 
 

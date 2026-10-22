@@ -1,3 +1,4 @@
+import nativeSftp from "lib/nativeSftp";
 import settings from "lib/settings";
 import mimeType from "mime-types";
 import { decode, encode } from "utils/encodings";
@@ -46,7 +47,7 @@ class SftpClient {
 	 */
 	lsDir(filename = this.#path) {
 		return new Promise((resolve, reject) => {
-			sftp.isConnected(async (connectionID) => {
+			nativeSftp.isConnected(async (connectionID) => {
 				(async () => {
 					if (this.#notConnected(connectionID)) {
 						try {
@@ -59,7 +60,7 @@ class SftpClient {
 
 					const path = this.#safeName(filename);
 
-					sftp.lsDir(
+					nativeSftp.lsDir(
 						path,
 						(res) => {
 							res.forEach((file) => {
@@ -88,7 +89,7 @@ class SftpClient {
 	createFile(filename, content) {
 		filename = Path.join(this.#path, filename);
 		return new Promise((resolve, reject) => {
-			sftp.isConnected((connectionID) => {
+			nativeSftp.isConnected((connectionID) => {
 				(async () => {
 					if (this.#notConnected(connectionID)) {
 						try {
@@ -98,7 +99,7 @@ class SftpClient {
 							return;
 						}
 					}
-					sftp.createFile(
+					nativeSftp.createFile(
 						filename,
 						content ? content : "",
 						async (_res) => {
@@ -120,7 +121,7 @@ class SftpClient {
 	createDir(dirname) {
 		dirname = Path.join(this.#path, dirname);
 		return new Promise((resolve, reject) => {
-			sftp.isConnected((connectionID) => {
+			nativeSftp.isConnected((connectionID) => {
 				(async () => {
 					if (this.#notConnected(connectionID)) {
 						try {
@@ -131,7 +132,7 @@ class SftpClient {
 						}
 					}
 
-					sftp.mkdir(
+					nativeSftp.mkdir(
 						this.#safeName(dirname),
 						async (_res) => {
 							resolve(Url.join(this.#base, this.#safeName(dirname)));
@@ -154,7 +155,7 @@ class SftpClient {
 		const filename = remotefile || this.#path;
 		const localFilename = this.#getLocalname(filename);
 		return new Promise((resolve, reject) => {
-			sftp.isConnected((connectionID) => {
+			nativeSftp.isConnected((connectionID) => {
 				(async () => {
 					try {
 						if (this.#notConnected(connectionID)) {
@@ -163,7 +164,7 @@ class SftpClient {
 
 						await internalFs.writeFile(localFilename, content, true, false);
 						const remoteFile = this.#safeName(filename);
-						sftp.putFile(remoteFile, localFilename, resolve, reject);
+						nativeSftp.putFile(remoteFile, localFilename, resolve, reject);
 					} catch (err) {
 						reject(err);
 					}
@@ -179,7 +180,7 @@ class SftpClient {
 		const filename = this.#path;
 		const localFilename = this.#getLocalname(filename);
 		return new Promise((resolve, reject) => {
-			sftp.isConnected((connectionID) => {
+			nativeSftp.isConnected((connectionID) => {
 				(async () => {
 					if (this.#notConnected(connectionID)) {
 						try {
@@ -190,7 +191,7 @@ class SftpClient {
 						}
 					}
 
-					sftp.getFile(
+					nativeSftp.getFile(
 						this.#safeName(filename),
 						localFilename,
 						async () => {
@@ -213,7 +214,7 @@ class SftpClient {
 	async copyTo(dest) {
 		const src = this.#path;
 		return new Promise((resolve, reject) => {
-			sftp.isConnected((connectionID) => {
+			nativeSftp.isConnected((connectionID) => {
 				(async () => {
 					try {
 						if (this.#notConnected(connectionID)) {
@@ -244,12 +245,12 @@ class SftpClient {
 
 		// Download source file
 		await new Promise((resolve, reject) => {
-			sftp.getFile(this.#safeName(src), tempFile, resolve, reject);
+			nativeSftp.getFile(this.#safeName(src), tempFile, resolve, reject);
 		});
 
 		// Upload
 		await new Promise((resolve, reject) => {
-			sftp.putFile(this.#safeName(destPath), tempFile, resolve, reject);
+			nativeSftp.putFile(this.#safeName(destPath), tempFile, resolve, reject);
 		});
 
 		// Clean up temp file
@@ -264,7 +265,7 @@ class SftpClient {
 		// Create destination directory
 		const destDir = Path.join(dest, Path.basename(src));
 		await new Promise((resolve, reject) => {
-			sftp.mkdir(this.#safeName(destDir), resolve, reject);
+			nativeSftp.mkdir(this.#safeName(destDir), resolve, reject);
 		});
 
 		// Get contents of source directory
@@ -293,7 +294,7 @@ class SftpClient {
 	rename(newname, move) {
 		const src = this.#path;
 		return new Promise((resolve, reject) => {
-			sftp.isConnected((connectionID) => {
+			nativeSftp.isConnected((connectionID) => {
 				(async () => {
 					if (this.#notConnected(connectionID)) {
 						try {
@@ -305,7 +306,7 @@ class SftpClient {
 					}
 
 					newname = move ? newname : Path.join(Path.dirname(src), newname);
-					sftp.rename(
+					nativeSftp.rename(
 						this.#safeName(src),
 						this.#safeName(newname),
 						async (_res) => {
@@ -328,7 +329,7 @@ class SftpClient {
 		const filename = this.#path;
 		const fullFilename = Url.join(this.#base, filename);
 		return new Promise((resolve, reject) => {
-			sftp.isConnected((connectionID) => {
+			nativeSftp.isConnected((connectionID) => {
 				(async () => {
 					if (this.#notConnected(connectionID)) {
 						try {
@@ -339,7 +340,7 @@ class SftpClient {
 						}
 					}
 					await this.#setStat();
-					sftp.rm(
+					nativeSftp.rm(
 						this.#safeName(filename),
 						this.#stat.isDirectory ? true : false,
 						this.#stat.isDirectory ? true : false,
@@ -357,7 +358,7 @@ class SftpClient {
 
 	pwd() {
 		return new Promise((resolve, reject) => {
-			sftp.isConnected((connectionID) => {
+			nativeSftp.isConnected((connectionID) => {
 				(async () => {
 					if (this.#notConnected(connectionID)) {
 						try {
@@ -368,7 +369,7 @@ class SftpClient {
 						}
 					}
 
-					sftp.pwd(
+					nativeSftp.pwd(
 						(res) => {
 							resolve(res);
 						},
@@ -413,14 +414,20 @@ class SftpClient {
 	 */
 	testConnection(requestID) {
 		return new Promise((resolve, reject) => {
-			sftp.testProfile(this.#profileID, requestID, 10000, resolve, reject);
+			nativeSftp.testProfile(
+				this.#profileID,
+				requestID,
+				10000,
+				resolve,
+				reject,
+			);
 		});
 	}
 
 	/** Cancel an in-flight profile test. */
 	cancelConnection(requestID) {
 		return new Promise((resolve) => {
-			sftp.cancelConnection(requestID, resolve, resolve);
+			nativeSftp.cancelConnection(requestID, resolve, resolve);
 		});
 	}
 
@@ -448,7 +455,7 @@ class SftpClient {
 
 	#connectOnce() {
 		return new Promise((resolve, reject) => {
-			sftp.connectUsingProfile(this.#profileID, resolve, reject);
+			nativeSftp.connectUsingProfile(this.#profileID, resolve, reject);
 		});
 	}
 
@@ -460,7 +467,7 @@ class SftpClient {
 		if (this.#stat) return this.#stat;
 
 		return new Promise((resolve, reject) => {
-			sftp.isConnected(async (connectionID) => {
+			nativeSftp.isConnected(async (connectionID) => {
 				(async () => {
 					if (this.#notConnected(connectionID)) {
 						try {
@@ -473,7 +480,7 @@ class SftpClient {
 
 					const path = this.#safeName(this.#path);
 
-					sftp.stat(
+					nativeSftp.stat(
 						path,
 						(res) => {
 							res.url = Url.join(this.#base, res.url);

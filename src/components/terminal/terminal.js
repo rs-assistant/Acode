@@ -18,6 +18,7 @@ import {
 } from "cm/commandRegistry";
 import confirm from "dialogs/confirm";
 import fonts from "lib/fonts";
+import nativeSftp from "lib/nativeSftp";
 import appSettings from "lib/settings";
 import { quotePosixShellArg } from "utils/shell";
 import LigaturesAddon from "./ligatures";
@@ -944,7 +945,7 @@ export default class TerminalComponent {
 			const finishConnecting = (event) => {
 				this.remoteInputDisposable = this.terminal.onData((data) => {
 					if (!this.isConnected || !this.remoteShellId) return;
-					sftp.writeShell(
+					nativeSftp.writeShell(
 						this.remoteShellId,
 						data,
 						() => {},
@@ -966,7 +967,7 @@ export default class TerminalComponent {
 						this.isConnected = true;
 						if (profile.initialDirectory && profile.initialDirectory !== "/") {
 							try {
-								sftp.writeShell(
+								nativeSftp.writeShell(
 									event.sessionId,
 									`cd ${quotePosixShellArg(profile.initialDirectory)}\n`,
 									() => finishConnecting(event),
@@ -1015,7 +1016,7 @@ export default class TerminalComponent {
 			};
 
 			const openShell = () => {
-				sftp.openShellUsingProfile(
+				nativeSftp.openShellUsingProfile(
 					profile.profileId,
 					this.terminal.cols,
 					this.terminal.rows,
@@ -1041,7 +1042,7 @@ export default class TerminalComponent {
 		this.lastRequestedServerSize = resizeKey;
 		if (this.remoteSsh) {
 			if (!this.remoteShellId) return;
-			sftp.resizeShell(
+			nativeSftp.resizeShell(
 				this.remoteShellId,
 				cols,
 				rows,
@@ -1115,7 +1116,7 @@ export default class TerminalComponent {
 	 */
 	write(data) {
 		if (this.remoteSsh && this.isConnected && this.remoteShellId) {
-			sftp.writeShell(
+			nativeSftp.writeShell(
 				this.remoteShellId,
 				data,
 				() => {},
@@ -1429,7 +1430,7 @@ export default class TerminalComponent {
 			this.remoteShellId = null;
 			this.isConnected = false;
 			await new Promise((resolve) => {
-				sftp.closeShell(shellID, resolve, resolve);
+				nativeSftp.closeShell(shellID, resolve, resolve);
 			});
 			return;
 		}
