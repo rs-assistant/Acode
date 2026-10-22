@@ -65,6 +65,17 @@ public class Tee extends CordovaPlugin {
     public synchronized boolean execute(String action, JSONArray args, CallbackContext callback)
             throws JSONException {
 
+        // Read-only build policy: no JS action may enable plugins in a WebView
+        // with access to saved SSH credentials. A different policy requires a
+        // separately reviewed build and a fresh process/WebView, not a live toggle.
+        if ("getSecurityPolicy".equals(action)) {
+            callback.success(new JSONObject()
+                    .put("mode", "ssh-safe")
+                    .put("thirdPartyPluginsAllowed", false)
+                    .put("savedSshAllowed", true));
+            return true;
+        }
+
         if ("establishConnection".equals(action)) {
             synchronized (this) {
                 if (sessionId != null) {

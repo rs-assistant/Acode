@@ -12,6 +12,10 @@ import customTab from "lib/customTab";
 import installPlugin from "lib/installPlugin";
 import InstallState from "lib/installState";
 import settings from "lib/settings";
+import {
+	getRuntimeSecurityPolicy,
+	pluginPolicyMessage,
+} from "lib/sshSecurityPolicy";
 import { interstitialAd } from "lib/startAd";
 import markdownIt from "markdown-it";
 import anchor from "markdown-it-anchor";
@@ -40,6 +44,11 @@ export default async function PluginInclude(
 	onUninstall,
 	installOnRender,
 ) {
+	const policy = await getRuntimeSecurityPolicy();
+	if (!policy.thirdPartyPluginsAllowed) {
+		await alert(strings["ssh safe mode"], pluginPolicyMessage(policy));
+		return;
+	}
 	if ($lastPluginPage) {
 		$lastPluginPage.hide();
 	}

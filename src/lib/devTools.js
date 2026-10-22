@@ -3,6 +3,7 @@ import loader from "dialogs/loader";
 import helpers from "utils/helpers";
 import Url from "utils/Url";
 import config from "./config";
+import { assertThirdPartyPluginsAllowed } from "./sshSecurityPolicy";
 
 let erudaInstance = null;
 let isInitialized = false;
@@ -33,6 +34,8 @@ const devTools = {
 	 * @returns {Promise<void>}
 	 */
 	async init(showLoader = false) {
+		// Eruda is downloaded/cached third-party code in the privileged WebView.
+		await assertThirdPartyPluginsAllowed();
 		if (isInitialized) return;
 
 		try {

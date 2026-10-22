@@ -13,6 +13,10 @@ import config from "lib/config";
 import installPlugin from "lib/installPlugin";
 import loadPlugin from "lib/loadPlugin";
 import settings from "lib/settings";
+import {
+	getRuntimeSecurityPolicy,
+	pluginPolicyMessage,
+} from "lib/sshSecurityPolicy";
 import FileBrowser from "pages/fileBrowser";
 import Plugin from "pages/plugin";
 import helpers from "utils/helpers";
@@ -23,8 +27,14 @@ import Item from "./item";
  *
  * @param {Array<object>} updates
  */
-export default function PluginsInclude(updates) {
+export default async function PluginsInclude(updates) {
 	const $page = Page(strings["plugins"]);
+	const policy = await getRuntimeSecurityPolicy();
+	if (!policy.thirdPartyPluginsAllowed) {
+		$page.append(<div className="message">{pluginPolicyMessage(policy)}</div>);
+		app.append($page);
+		return;
+	}
 	const $search = <span className="icon search" data-action="search"></span>;
 	const $add = <span className="icon add" data-action="add-source"></span>;
 	const $filter = <span className="icon tune" data-action="filter"></span>;

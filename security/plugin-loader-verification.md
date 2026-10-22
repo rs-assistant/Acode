@@ -1,10 +1,15 @@
 # Plugin Loader / SSH trust-boundary verification
 
-Status: source and runtime verification required. This document does **not** assert plugin isolation.
+Status: source traced and dummy JS/native regressions executed; Android runtime
+verification remains required. This document does **not** assert plugin isolation.
+The accepted [SSH-safe edition](ssh-safe-mode.md) blocks plugin execution entirely.
 
 ## Evidence
 
 - Acode plugin contract loads JavaScript entry scripts and exposes the global `acode` API.
+- `src/lib/loadPlugin.js` appends the entry script to the main document. The
+  shared-realm delegation/interception gaps are reproduced in
+  `tests/security/ssh-boundary-audit.test.js`; they are not passing safety tests.
 - Native `Sftp.execute()` exposes profile-based connect, shell, command and file operations via Cordova, without caller identity checks.
 - `Tee.requestToken` accepts permissions from supplied plugin JSON; a plugin ID is not a cryptographic identity.
 - A separate `WebViewInstance` exists for auxiliary web content, but does not establish isolation for all installed plugins.

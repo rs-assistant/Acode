@@ -4,6 +4,7 @@ import com.foxdebug.acode.rk.plugin.Tee;
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaWebView;
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  * Regressions for the actual Tee.java source using dummy Android, Cordova,
@@ -28,6 +29,12 @@ public class TeeAudit {
     public static void main(String[] args) throws Exception {
         Tee tee = new Tee();
         tee.initialize(Context::new, new CordovaWebView() {});
+        JSONObject policy = (JSONObject) call(tee, "getSecurityPolicy").value;
+        check("ssh-safe".equals(policy.getString("mode")), "SSH safe mode must be native policy");
+        check(!policy.getBoolean("thirdPartyPluginsAllowed"), "Third-party themes and plugins must be disabled");
+        check(policy.getBoolean("savedSshAllowed"), "Built-in SSH must remain enabled");
+        check(!tee.execute("setSecurityPolicy", new JSONArray(), new CallbackContext()),
+                "A JS caller must not change native policy");
         String session = (String) call(tee, "establishConnection").value;
 
         CallbackContext invalid = call(tee, "requestToken", "wrong-session", "example", "{}");

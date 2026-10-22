@@ -5,13 +5,12 @@ import Url from "utils/Url";
 import actionStack from "./actionStack";
 import fileIcons from "./fileIcons";
 import generatePluginContext, { connect } from "./pluginContext";
+import { assertThirdPartyPluginsAllowed } from "./sshSecurityPolicy";
 
 export default async function loadPlugin(pluginId, justInstalled = false) {
-	// Establish the trusted native session BEFORE any plugin script is appended
-	// and run. Plugin main.js runs as soon as its <script> is appended below, so
-	// this must happen first, otherwise a malicious plugin could race us and
-	// steal the session, then request tokens for other plugins. This is the
-	// single choke point through which all plugin loads flow.
+	await assertThirdPartyPluginsAllowed();
+	// A session secret is NOT same-realm plugin isolation. Keep the native
+	// policy gate above all filesystem, unmount and script execution effects.
 	await connect();
 
 	const baseUrl = await helpers.toInternalUri(Url.join(PLUGIN_DIR, pluginId));

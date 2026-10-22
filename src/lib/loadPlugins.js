@@ -2,6 +2,10 @@ import fsOperation from "../fileSystem";
 import Url from "../utils/Url";
 import loadPlugin from "./loadPlugin";
 import settings from "./settings";
+import {
+	assertThirdPartyPluginsAllowed,
+	getRuntimeSecurityPolicy,
+} from "./sshSecurityPolicy";
 
 // theme-related keywords for determining theme plugins
 const THEME_IDENTIFIERS = new Set([
@@ -51,6 +55,11 @@ export default async function loadPlugins(loadOnlyTheme = false) {
 	}
 
 	try {
+		const policy = await getRuntimeSecurityPolicy();
+		if (!policy.thirdPartyPluginsAllowed) {
+			acode[onPluginsLoadCompleteCallback]();
+			return 0;
+		}
 		const plugins = await fsOperation(PLUGIN_DIR).lsDir();
 		const results = [];
 
@@ -127,6 +136,8 @@ export function isInitialPluginLoadComplete() {
 }
 
 export async function loadPluginWithTimeout(pluginId, justInstalled = false) {
+	// A policy denial is not a broken plugin and must not alter user settings.
+	await assertThirdPartyPluginsAllowed();
 	const pluginState = { settled: false };
 	const pluginLoadPromise = loadPlugin(pluginId, justInstalled)
 		.catch(async (error) => {

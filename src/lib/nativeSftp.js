@@ -13,8 +13,9 @@ function invoke(action, args, onSuccess, onFail) {
 }
 
 // This bridge is imported only by Acode's bundled application modules. The
-// SFTP Cordova plugin deliberately does not clobber window.sftp, so installed
-// third-party scripts cannot obtain a callable wrapper for these operations.
+// SFTP Cordova plugin deliberately does not clobber window.sftp. This alone
+// does not isolate same-realm code: the SSH-safe edition must block third-party
+// scripts before execution (see sshSecurityPolicy and the plugin loader).
 const nativeSftp = {
 	exec(command, onSuccess, onFail) {
 		invoke("exec", [command], onSuccess, onFail);

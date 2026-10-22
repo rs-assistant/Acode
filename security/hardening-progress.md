@@ -43,3 +43,21 @@ test binary without a new source/validation record and clear test instructions.
   unresolved shared-realm defects; the isolation release check remains red.
 - Plugin secret storage has a compatibility cutover; see
   [plugin-secret-storage.md](plugin-secret-storage.md) before installing a new APK.
+
+## Stage 3: user-approved SSH-safe edition
+
+- Add an immutable native read-only policy; no runtime setter or settings toggle.
+  Block all third-party plugins and plugin themes before any script execution,
+  including direct/retry/installation entry points. Preserve installed plugins
+  and settings, and show English/Traditional Chinese notices in plugin UI.
+- Also block downloaded/cached Eruda scripts in the privileged WebView. Native
+  policy failures, malformed values and timeouts fail closed for plugin loading.
+- Replace the obsolete deliberately-red shared-realm authentication placeholder
+  with checks for the accepted no-plugin architecture and 15 real-source policy,
+  loader, installer and UI tests. Do not imply native caller identity exists.
+  **Production release remains BLOCKED** by the explicit device checklist.
+- Full Vitest: 94 files, 840 tests passed. Native harness: 34 assertions passed.
+  Typecheck, targeted Biome and diff checks passed. Android build/signature passed:
+  62 tasks, 6 executed and 56 up-to-date, 13 seconds.
+- See [safe-mode design and device acceptance](ssh-safe-mode.md). No new APK was
+  published and the existing tablet download remains unchanged.

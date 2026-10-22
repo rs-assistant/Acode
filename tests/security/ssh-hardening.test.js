@@ -20,20 +20,19 @@ describe("SSH security invariants (source-level regression checks)", () => {
 		);
 	});
 
-	it("blocks release until native saved-profile authorization is implemented", () => {
-		// Intentional red security gate: a method allowlist is NOT caller authorization.
-		// Replace this source-level check with adversarial Android tests once a
-		// genuinely isolated native caller-authentication boundary is implemented.
-		const sftp = read("src/plugins/sftp/src/com/foxdebug/sftp/Sftp.java");
-		const nativeBridge = sftp.slice(sftp.indexOf("public boolean execute("));
-		const connect = nativeBridge.indexOf('case "connectUsingProfile":');
-		const shell = nativeBridge.indexOf('case "openShellUsingProfile":');
-		expect(connect).toBeGreaterThan(-1);
-		expect(shell).toBeGreaterThan(-1);
-		// Current bridge exposes these operations without native caller authorization.
-		// This assertion MUST fail until an independently authenticated native
-		// authorization check is wired into dispatch and covered by device tests.
-		expect(nativeBridge).toContain("enforceTrustedNativeCaller(");
+	it("requires the native safe-build policy before any third-party script loading", () => {
+		// The user selected the no-plugin safe edition, NOT shared-realm caller
+		// authentication. Behavioral coverage lives in ssh-safe-mode.test.js and
+		// the native harness. Device acceptance remains a separate release gate.
+		const tee = read("src/plugins/pluginContext/src/android/Tee.java");
+		expect(tee).toContain('.put("mode", "ssh-safe")');
+		expect(tee).toContain('.put("thirdPartyPluginsAllowed", false)');
+		expect(tee).not.toContain('"setSecurityPolicy"');
+		const loader = read("src/lib/loadPlugin.js");
+		const gate = loader.indexOf("await assertThirdPartyPluginsAllowed()");
+		expect(gate).toBeGreaterThan(-1);
+		expect(gate).toBeLessThan(loader.indexOf("await connect()"));
+		expect(gate).toBeLessThan(loader.indexOf("document.head.append($script)"));
 	});
 
 	it("validates plugin manifest before issuing a token", () => {

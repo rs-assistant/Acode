@@ -1,5 +1,8 @@
 {
 	"lang": "English",
+	"ssh safe mode": "SSH safe mode",
+	"ssh safe mode message": "SSH safe mode disables all third-party plugins, including plugin themes. Built-in SSH/SFTP remains available. Installed plugins and their settings are preserved. Changing this policy requires a different build and restarting the app.",
+	"security policy unavailable": "Security policy unavailable. Third-party plugins are blocked. Restart the app and try again.",
 	"about": "About",
 	"active files": "Active files",
 	"alert": "Alert",

@@ -1,5 +1,8 @@
 {
 	"lang": "繁體中文",
+	"ssh safe mode": "SSH 安全模式",
+	"ssh safe mode message": "SSH 安全模式已停用所有第三方外掛，包含外掛主題；內建 SSH／SFTP 仍可使用。已安裝的外掛及設定會保留。變更此政策需要不同版本並重新啟動應用程式。",
+	"security policy unavailable": "無法取得安全政策，已封鎖第三方外掛。請重新啟動應用程式後再試。",
 	"about": "關於",
 	"active files": "打開的文件",
 	"alert": "提醒",

@@ -10,6 +10,7 @@ import { isVersionGreater } from "utils/version";
 import config from "./config";
 import InstallState from "./installState";
 import { loadPluginWithTimeout } from "./loadPlugins";
+import { assertThirdPartyPluginsAllowed } from "./sshSecurityPolicy";
 
 /** @type {import("dialogs/loader").Loader} */
 let loaderDialog;
@@ -29,6 +30,7 @@ export default async function installPlugin(
 	purchaseToken,
 	isDependency,
 ) {
+	await assertThirdPartyPluginsAllowed();
 	if (!isDependency) {
 		loaderDialog = loader.create(name || "Plugin", strings.installing, {
 			timeout: 6000,
