@@ -226,3 +226,22 @@ test binary without a new source/validation record and clear test instructions.
 - Clean runtime source `0c37fdf0` rebuilt/signed in 10 seconds (62 up-to-date),
   retaining the inspected APK hash; updated bundled Lodash, license and main.js
   verified in the package. Source is published on the security branch, not main.
+
+## Stage 11: close the remaining development-tool chain
+
+- Keep the CodeMirror submodule clean/pinned. Explicitly declare root development
+  buildhelper 1.0.2 and scope a Mocha 12 override to its testtool; the real linked
+  client now resolves Mocha 12.0.3 and serialize-javascript 7.1.4. No source fork,
+  ignored node_modules edits or unrelated direct Mocha install.
+- Normal fresh npm ci (including lifecycle hooks), actual client prepare,
+  typecheck, Biome and diff checks pass. New real-runner/ESM/CommonJS/parallel-worker
+  coverage checks both positive counts and an expected failure. Full Vitest:
+  99 files / 906 tests passed.
+- Both fresh full and omit-dev npm audits return 0 findings and exit 0. These
+  close the earlier four nodes, not every embedded/Maven/device security issue.
+  See [migration and limits](codemirror-toolchain-migration.md).
+- Android rebundle/build/signature passed in 10 seconds (62 up-to-date); SDK
+  26/36/36 and certificate match. The resulting APK is byte-identical to the
+  previously archived local dependency-update build; this migration is dev-only.
+- Main and existing tablet downloads remain untouched; no new APK published.
+  Production SSH approval remains BLOCKED pending the broader acceptance work.

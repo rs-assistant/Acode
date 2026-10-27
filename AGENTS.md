@@ -42,6 +42,10 @@
   0.18.11；改版前讀 `security/dependency-audit-2026-10-27.md`。
 - `codemirror-lsp-client/`：Git submodule，也是本機 `file:` dependency。
   不把 submodule 的修改混入無關工作。
+  Root 的 devDependency `@codemirror/buildhelper` 與 testtool→Mocha override
+  刻意讓開發工具依賴可受 root 管理；勿只裝另一份 Mocha 就宣稱修補。
+  改動時跑 `tests/security/codemirror-toolchain.test.js`，確認實際 client→helper→
+  runner 解析及平行 worker 相容性；見 `security/codemirror-toolchain-migration.md`。
 - `platforms/`、`plugins/`、`node_modules/`、`www/build/` 是產生或安裝的內容。
   `www/` 也有追蹤中的靜態檔案，不可整個刪除或當作產物覆寫。
 

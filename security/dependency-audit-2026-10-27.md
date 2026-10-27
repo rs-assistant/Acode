@@ -1,5 +1,9 @@
 # Dependency follow-up — 2026-10-27
 
+The results below describe the earlier runtime/library update. The subsequent
+[CodeMirror toolchain migration](codemirror-toolchain-migration.md) closes the
+four remaining development findings: both fresh npm scans now return zero.
+
 ## Scope and results
 
 Fresh npm scans and targeted bundled-JavaScript review, not a comprehensive

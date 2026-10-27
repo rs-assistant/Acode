@@ -8,7 +8,7 @@ This branch is **not approved for production SSH credentials**.
 2. The actual loader was traced: third-party plugins execute in the main WebView with Cordova access. The accepted [SSH-safe edition](ssh-safe-mode.md) now blocks their execution before script loading, including themes and cached developer tools. Device/upgrade enforcement is not yet validated.
 3. An application-level JavaScript token cannot establish a trustworthy native caller identity if plugins share the same realm.
 4. Native/JS regressions and packaged manifest/extraction inspection passed locally; Android adversarial/upgrade tests are still outstanding. A stub harness is not the real Cordova runtime.
-5. [Updated scans](dependency-audit-2026-10-27.md) report zero omit-dev npm findings but four development-tool nodes remain. Embedded-library/Maven inventory and tablet compatibility are incomplete; no wholly clean dependency or comprehensive Maven scan is claimed.
+5. [Current scans](codemirror-toolchain-migration.md) report zero npm findings both with and without development dependencies. This closes the known npm chain, not the incomplete embedded-library/Maven inventory or tablet compatibility work; no comprehensive dependency-security approval is claimed.
 
 ## Unblock only after
 
