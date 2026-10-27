@@ -1,0 +1,184 @@
+name: Manual tablet test APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      upload_release:
+        description: Also upload to a NEW DRAFT prerelease (never publish automatically)
+        type: boolean
+        required: true
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: manual-tablet-apk-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    # Do not run upstream releases, PR code, arbitrary refs, or main's older source.
+    if: >-
+      github.repository == 'rs-assistant/Acode' &&
+      github.event_name == 'workflow_dispatch' &&
+      github.ref == 'refs/heads/security/ssh-native-hardening'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Check out the exact dispatched source without retained credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          submodules: recursive
+          persist-credentials: false
+      - name: Use Node 24
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+      - name: Use JDK 21
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Install SDK 36
+        uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407 # v3
+        with:
+          packages: platform-tools platforms;android-36 build-tools;36.0.0
+          log-accepted-android-sdk-licenses: false
+      - name: Install pinned bootstrap Gradle without shared caches
+        uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6
+        with:
+          gradle-version: '8.14.2'
+          cache-disabled: true
+      - name: Install frozen dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Verify vendored cookie build inputs
+        run: |
+          npm run build:http-cookie
+          git diff --exit-code -- src/plugins/cordova-plugin-advanced-http/www/umd-tough-cookie.js src/plugins/cordova-plugin-advanced-http/www/tough-cookie.LICENSE
+      - name: Test JavaScript and types
+        run: |
+          npm test
+          npm run typecheck
+      - name: Test native policies, storage, crypto and local sockets
+        run: |
+          bash tests/security/native-audit/run.sh
+          bash tests/security/preferences-audit/run.sh
+          bash tests/security/keygen-audit/run.sh
+          bash tests/security/process-stream-audit/run.sh
+          bash tests/security/preview-bind-audit/run.sh
+      - name: Build current paid Debug source without release or persistent signing secrets
+        run: bash utils/ci/build-test-apk.sh
+      - name: Transfer only the APK to a separate runner
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: intermediate-apk-${{ github.run_id }}-${{ github.run_attempt }}
+          path: platforms/android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+
+  deliver:
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    # No source checkout or execution of code from the build job on this runner.
+    env:
+      ACODE_EXPECTED_SIGNER_SHA256: c6a811233830332c03851f95b3487faa7e4bde3b93f854b9cf4d8cb2a7969351
+    steps:
+      - name: Use JDK 21 for Android signing tools
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Install Android signing tools
+        uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407 # v3
+        with:
+          packages: build-tools;36.0.0
+          log-accepted-android-sdk-licenses: false
+      - name: Download this run's APK only
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          name: intermediate-apk-${{ github.run_id }}-${{ github.run_attempt }}
+          path: incoming
+      - name: Restore the existing test-only signer (never generate a replacement)
+        id: restore_signer
+        env:
+          ACODE_DEBUG_KEYSTORE_BASE64: ${{ secrets.ACODE_DEBUG_KEYSTORE_BASE64 }}
+        run: |
+          set -euo pipefail
+          test -n "${ACODE_DEBUG_KEYSTORE_BASE64:-}" || { echo '::error::Missing ACODE_DEBUG_KEYSTORE_BASE64. Do not uninstall Acode or generate a different signer.'; exit 1; }
+          umask 077
+          printf '%s' "$ACODE_DEBUG_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/acode-debug.keystore"
+          acode_signer=$(keytool -exportcert -keystore "$RUNNER_TEMP/acode-debug.keystore" -alias androiddebugkey -storepass android | sha256sum | cut -d ' ' -f 1)
+          test "$acode_signer" = "$ACODE_EXPECTED_SIGNER_SHA256" || { echo '::error::Wrong signing certificate; refusing an incompatible APK.'; exit 1; }
+      - name: Re-sign and record exact source, checksums and compatibility
+        id: sign
+        run: |
+          set -euo pipefail
+          acode_tools="$ANDROID_HOME/build-tools/36.0.0"
+          mkdir -p delivery
+          acode_apk="delivery/acode-tablet-${GITHUB_SHA}.apk"
+          "$acode_tools/apksigner" sign --ks "$RUNNER_TEMP/acode-debug.keystore" --ks-key-alias androiddebugkey --ks-pass pass:android --key-pass pass:android --out "$acode_apk" incoming/app-debug.apk
+          "$acode_tools/apksigner" verify --verbose --print-certs "$acode_apk" > delivery/signature.txt
+          acode_signer=$(sed -n 's/^Signer #1 certificate SHA-256 digest: //p' delivery/signature.txt)
+          test "$acode_signer" = "$ACODE_EXPECTED_SIGNER_SHA256"
+          test "$(grep -c '^Signer #[0-9]* certificate SHA-256 digest:' delivery/signature.txt)" -eq 1
+          "$acode_tools/zipalign" -c -P 16 4 "$acode_apk"
+          "$acode_tools/aapt" dump badging "$acode_apk" > delivery/package.txt
+          grep -q "^package: name='com.foxdebug.acode' " delivery/package.txt
+          grep -qx "sdkVersion:'26'" delivery/package.txt
+          grep -qx "targetSdkVersion:'36'" delivery/package.txt
+          (cd delivery && sha256sum "acode-tablet-${GITHUB_SHA}.apk" > SHA256SUMS)
+          node <<'NODE'
+          const fs = require('fs');
+          const e = process.env;
+          const checksum = fs.readFileSync('delivery/SHA256SUMS', 'utf8').split(' ')[0];
+          fs.writeFileSync('delivery/provenance.json', JSON.stringify({
+            repository: e.GITHUB_REPOSITORY, sourceCommit: e.GITHUB_SHA,
+            workflowRun: `${e.GITHUB_SERVER_URL}/${e.GITHUB_REPOSITORY}/actions/runs/${e.GITHUB_RUN_ID}`,
+            runAttempt: e.GITHUB_RUN_ATTEMPT, apkSha256: checksum,
+            certificateSha256: e.ACODE_EXPECTED_SIGNER_SHA256,
+            packageName: 'com.foxdebug.acode', buildType: 'Debug tablet test',
+            deviceTested: false, productionApproved: false,
+          }, null, 2) + '\n');
+          NODE
+          {
+            printf '# Acode tablet TEST build\n\nSource: `%s`\n\n' "$GITHUB_SHA"
+            printf 'Debug-signed personal test build; NOT approved for production SSH credentials.\n'
+            printf 'No Android device/emulator acceptance is implied by CI.\n\n'
+            printf 'Verify SHA256SUMS and signature.txt before installing. Back up data; do not uninstall on a signature conflict.\n'
+            printf 'GitHub-hosted build is not claimed byte-identical to prior cloud APKs.\n'
+          } > delivery/README.md
+      - name: Remove only the temporary signing file, even after failure
+        if: always()
+        run: rm -f -- "$RUNNER_TEMP/acode-debug.keystore"
+      - name: Save signed test APK and verification records
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: acode-tablet-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            delivery/*.apk
+            delivery/SHA256SUMS
+            delivery/signature.txt
+            delivery/package.txt
+            delivery/provenance.json
+            delivery/README.md
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0
+      - name: Upload a NEW DRAFT prerelease without overwriting old downloads
+        if: inputs.upload_release
+        env:
+          GH_TOKEN: ${{ secrets.ACODE_RELEASE_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "${GH_TOKEN:-}" || { echo '::error::Missing ACODE_RELEASE_TOKEN in GitHub Actions Secrets.'; exit 1; }
+          (cd delivery && sha256sum --check SHA256SUMS)
+          acode_tag="tablet-test-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          gh release create "$acode_tag" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --draft --prerelease --latest=false \
+            --title "Acode tablet test ${GITHUB_SHA:0:8} (run ${GITHUB_RUN_ID}.${GITHUB_RUN_ATTEMPT})" \
+            --notes-file delivery/README.md \
+            "delivery/acode-tablet-${GITHUB_SHA}.apk" delivery/SHA256SUMS delivery/signature.txt delivery/package.txt delivery/provenance.json
+          printf 'Draft release: https://github.com/%s/releases\n' "$GITHUB_REPOSITORY" >> "$GITHUB_STEP_SUMMARY"
