@@ -55,6 +55,11 @@ or production-key compatibility claim follows from disposable JVM tests.
 The final selected 1.86 graph has **0 affected modules among 87** in this GitHub
 advisory query. npm full and omit-dev scans also both exit 0 with zero findings.
 Machine-readable runtime inventory/query evidence is retained separately.
+See [the clean-source snapshot](android-runtime-advisories-2026-10-27.json),
+collected from runtime source `1bb96cb16f6ba38b865a5c9208e7bf70f431a500`
+after a clean committed-source rebuild. The same APK hash was retained in that
+10-second rebuild (all 62 tasks up-to-date); the CI-style vendor rebuild/diff
+check also passed against the committed distribution and license.
 
 Commons IO declarations are raised to the already-resolved 2.20.0, avoiding a
 future fallback to vulnerable 2.11.0 if another plugin is removed. NanoHTTPD's

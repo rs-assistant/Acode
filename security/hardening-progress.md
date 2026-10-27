@@ -267,3 +267,7 @@ test binary without a new source/validation record and clear test instructions.
 - See [findings, failures, controls and remaining limits](native-and-vendored-audit.md).
   Main/previous artifacts and CodeMirror submodule are preserved; production gate
   stays BLOCKED. Remote CI, additional advisory coverage and device work are open.
+- Clean committed runtime source `1bb96cb1` rebuilt/signed in 10 seconds (62
+  up-to-date), preserving the inspected APK hash. A fresh clean-source 87-module
+  query again returned zero; its source/timestamp/provider/controls are retained
+  in [the machine-readable report](android-runtime-advisories-2026-10-27.json).
