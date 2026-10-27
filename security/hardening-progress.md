@@ -310,3 +310,19 @@ test binary without a new source/validation record and clear test instructions.
 - No public APK replacement, main update or device testing. Same-device client
   authorization and native preview response-map/concurrency/lifecycle remain open.
   See [current findings and artifact hash](local-network-boundaries.md).
+
+## Stage 15: manual test-APK build and draft-only delivery
+
+- Add a dispatch-only workflow for this fork's exact security branch, frozen npm
+  inputs and pinned toolchain/actions. The source/dependency build job has no
+  persistent signing key or release token; a separate runner verifies and uses
+  the approved existing Debug signer, then optionally creates a new draft only.
+- Full JS: 103 files / 978 tests, typecheck, targeted Biome, shell and actionlint
+  checks pass. A fresh source/submodule archive rebuild executes all 62 Gradle
+  tasks, preserves package/lock/config hashes, and actual isolated re-signing,
+  package/SDK/zipalign/fingerprint/cleanup checks pass locally. Upload tests use a
+  dummy API, not GitHub writes; no remote Actions run or new public APK is claimed.
+- Registration on default main still needs review; the security branch alone
+  does not enable workflow_dispatch. The approved Debug-key secret transfer is
+  blocked by the integration's Secrets API 403, not silently replaced with a new
+  key. See [setup, controls and exact validation scope](manual-tablet-apk-workflow.md).

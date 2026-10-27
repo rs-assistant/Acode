@@ -174,6 +174,10 @@ git diff --check
 
 ## 交付
 
+- 手動平板 APK 流程見 `security/manual-tablet-apk-workflow.md`。
+  固定沿用現有測試 signer、建置與 secret 使用分 job，Release 僅新增草稿。
+  不為了啟用 `workflow_dispatch` 直接改 `main` 或合併整個安全分支；也不能把
+  分支上存在 YAML／本機 mock 上傳測試說成已註冊 workflow／遠端發布成功。
 說明改了什麼、驗證結果與仍存在的限制；避免把本機修改說成已提交、
 把設定草稿說成已發布，或把產物下載分支說成可重現的 source release。
 提供給平板的 APK 應使用實際驗證過的 HTTPS 下載連結；`/workspace/...` 是
