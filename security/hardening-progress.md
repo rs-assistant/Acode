@@ -321,8 +321,11 @@ test binary without a new source/validation record and clear test instructions.
   checks pass. A fresh source/submodule archive rebuild executes all 62 Gradle
   tasks, preserves package/lock/config hashes, and actual isolated re-signing,
   package/SDK/zipalign/fingerprint/cleanup checks pass locally. Upload tests use a
-  dummy API, not GitHub writes; no remote Actions run or new public APK is claimed.
+  dummy API, not GitHub writes; no remote manual-APK run or new public APK is claimed.
 - Registration on default main still needs review; the security branch alone
   does not enable workflow_dispatch. The approved Debug-key secret transfer is
   blocked by the integration's Secrets API 403, not silently replaced with a new
   key. See [setup, controls and exact validation scope](manual-tablet-apk-workflow.md).
+- A workflow-only registration PR #1 is open, with all five checks passing. The
+  existing security-branch CI for cc332b2c also reports success via API (logs are
+  blocked by the proxy); these are not a completed run of the new manual build.

@@ -8,7 +8,8 @@
 1. GitHub 要求 `workflow_dispatch` 的 workflow 先存在預設分支，才可手動觸發。
    此 fork 的預設分支是 `main`。目前修改先放在
    `security/ssh-native-hardening`，**不代表已啟用**。
-   審查後只將 `.github/workflows/manual-test-apk.yml` 納入 `main` 即可註冊，
+   已建立只含此 workflow 的[啟用 PR #1](https://github.com/rs-assistant/Acode/pull/1)，
+   尚未合併。審查後只將 `.github/workflows/manual-test-apk.yml` 納入 `main` 即可註冊，
    不必為了這一步把整條安全分支合併進去。若 fork 的 Actions 尚未啟用，
    也要先在 GitHub 的 Actions 分頁啟用。實際執行時一定選安全分支；選
    `main`、tag 或其他分支會跳過工作，不會建置舊版或任意 PR 程式碼。
@@ -103,6 +104,14 @@ c6a811233830332c03851f95b3487faa7e4bde3b93f854b9cf4d8cb2a7969351
   暫存 key 副本已刪除，原始測試 keystore 未改動。
 - 草稿上傳的實際 shell 使用 dummy 檔案與 mock `gh` 驗證參數；缺少 token、
   APK 被修改、缺少／錯誤簽章時的拒絕測試通過。沒有對 GitHub 建立草稿、
-  發布 Release、傳送簽章 key 或執行遠端 Actions，因此不宣稱遠端流程已成功。
+  發布 Release、傳送簽章 key 或執行新的手動 APK workflow，因此不宣稱該遠端
+  建置／簽章／上傳流程已成功。
+- 提交後另外核對安全分支 source `cc332b2c` 的
+  [既有遠端 CI](https://github.com/rs-assistant/Acode/actions/runs/40474350880)：
+  GitHub API 回報 native regressions、unit tests、formatting、spelling 全部成功，
+  translation 按事件條件略過。啟用 PR #1 的五個 checks 也全部成功，仍待審查／合併。
+  雲端 proxy 拒絕下載 Actions log 的網域，因此此處的遠端結論只引用 API job
+  狀態；上列詳細測試數量來自本機輸出，不是聲稱已重新讀取遠端 log。
+  既有 CI 成功也不等於新手動 APK workflow 或實機驗證成功。
 
 Production gate 仍見 [SSH_PRODUCTION_RELEASE_BLOCKED.md](SSH_PRODUCTION_RELEASE_BLOCKED.md)。
