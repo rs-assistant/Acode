@@ -1,5 +1,8 @@
 # Dependency audit — 2026-10-22
 
+Historical record. See the [2026-10-27 follow-up](dependency-audit-2026-10-27.md)
+for newer source updates, fresh scans, embedded-library checks and remaining risks.
+
 Scope: this hardening branch, npm lockfile and a targeted Android dependency
 resolution check. This is not a complete Maven/CVE audit or a security approval.
 

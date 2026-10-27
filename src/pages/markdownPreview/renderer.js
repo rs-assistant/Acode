@@ -162,6 +162,7 @@ function createMarkdownIt({ katex = null, markdownItTexmath = null } = {}) {
 			engine: katex,
 			delimiters: ["dollars", "beg_end"],
 			katexOptions: {
+				trust: false,
 				throwOnError: false,
 				strict: "ignore",
 			},

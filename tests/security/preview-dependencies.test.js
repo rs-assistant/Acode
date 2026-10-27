@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import DOMPurify from "dompurify";
+import katex from "katex";
 import { renderMarkdown } from "pages/markdownPreview/renderer";
 import { describe, expect, it } from "vitest";
 
@@ -42,5 +43,40 @@ describe("updated preview dependency compatibility", () => {
 		expect(await mermaid.parse("flowchart TD\n A --> B")).toMatchObject({
 			diagramType: "flowchart-v2",
 		});
+	});
+
+	it.each([
+		"\\href{javascript:dummy()}{unsafe}",
+		"\\includegraphics{https://example.invalid/dummy.png}",
+		"\\htmlStyle{background:url(https://example.invalid)}{unsafe}",
+	])("does not enable trusted math HTML commands in preview: %s", async (formula) => {
+		const { html } = await renderMarkdown(`$${formula}$`);
+		const container = document.createElement("div");
+		container.innerHTML = html;
+		expect(container.querySelector("a, img, script, iframe")).toBeNull();
+		expect(container.querySelector('[style*="example.invalid"]')).toBeNull();
+	});
+
+	it("ignores inherited trust settings in the patched math library", () => {
+		const options = Object.assign(Object.create({ trust: true }), {
+			throwOnError: false,
+			strict: "ignore",
+		});
+		const container = document.createElement("div");
+		container.innerHTML = katex.renderToString(
+			"\\href{https://example.invalid}{unsafe}",
+			options,
+		);
+		expect(container.querySelector("a")).toBeNull();
+	});
+
+	it.each([
+		["sequenceDiagram\n Alice->>Bob: Hello", "sequence"],
+		["classDiagram\n Animal <|-- Duck", "class"],
+		["stateDiagram-v2\n [*] --> Ready", "stateDiagram"],
+	])("parses supported diagram types after the major dependency update: %s", async (source, type) => {
+		const { default: mermaid } = await import("mermaid");
+		mermaid.initialize({ startOnLoad: false, securityLevel: "strict" });
+		expect((await mermaid.parse(source)).diagramType).toContain(type);
 	});
 });

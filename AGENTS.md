@@ -36,6 +36,10 @@
   `hooks/`：Cordova prepare 時套用到產生專案的自訂處理。
 - `utils/`、`rspack.config.js`：設定、建置及開發工具。
 - `tests/`：Vitest 測試；`src/test/` 是裝置內測試環境，不能當作 Node 測試執行。
+- `npm audit` 不涵蓋全部內嵌 JS。HTTP plugin 的 `www/lodash.js` 是獨立
+  vendored 程式，更新時保留授權資產並跑 `tests/security/vendored-http-lodash.test.js`。
+  KaTeX 0.18.10 exact pin 與 Mermaid `$katex` override 刻意避開上游誤發的
+  0.18.11；改版前讀 `security/dependency-audit-2026-10-27.md`。
 - `codemirror-lsp-client/`：Git submodule，也是本機 `file:` dependency。
   不把 submodule 的修改混入無關工作。
 - `platforms/`、`plugins/`、`node_modules/`、`www/build/` 是產生或安裝的內容。

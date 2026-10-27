@@ -202,3 +202,24 @@ test binary without a new source/validation record and clear test instructions.
   matched and the downloaded signature verified. See [publication record](ssh-storage-apk-publication.json).
 - This source's device upgrade/failure/deletion/adversarial acceptance is still
   pending. Positive earlier key-generation feedback is not reassigned to this APK.
+
+## Stage 10: runtime migration and embedded HTTP library
+
+- October 27 baseline was 2 omit-dev / 20 full nodes before edits; advisory changes
+  since the older 11/30 scan are not all credited to this patch.
+- Migrate KaTeX to reviewed 0.18.10 and Mermaid to 12.2.0, aligning KaTeX copies
+  with explicit preview trust=false. Avoid deprecated, mistakenly released 0.18.11.
+- Replace embedded HTTP-plugin Lodash 4.17.1 with upstream 4.18.1 and license
+  asset. Reproduce/fix prototype write/deletion regressions in isolated VMs and
+  retain cookie path/adapter checks. npm alone missed this vendored copy.
+- Update patched test/tool leaves; remove stale upstream-only vendored-plugin
+  development dependencies/scripts pointing at absent tests, not product tests.
+  Keep the CodeMirror submodule and Cordova version unchanged.
+- Fresh lockfile installation, 98 files / 901 JS tests, typecheck and 216 native
+  assertions pass. Android build/signature: 13 seconds, 9/62 tasks executed.
+- Scans: omit-dev 0 (exit 0); full 4 (1 high / 3 moderate, exit 1) in the unresolved
+  buildhelper/testtool/Mocha/serialize chain. Discard ineffective trial overrides
+  instead of claiming the actual resolved Mocha changed. Browser attempt timed out.
+- Details: [October 27 follow-up](dependency-audit-2026-10-27.md). Previous APK
+  downloads and main are preserved; no replacement APK published at this stage.
+  Production credential approval remains BLOCKED; tablet visuals are pending.

@@ -17,10 +17,6 @@
     "ecosystem:cordova",
     "cordova-android"
   ],
-  "scripts": {
-    "test": "npm run jshint",
-    "jshint": "node node_modules/jshint/bin/jshint www && node node_modules/jshint/bin/jshint src && node node_modules/jshint/bin/jshint tests"
-  },
   "engines": {
     "cordovaDependencies": {
       "0.0.0": {
@@ -44,8 +40,5 @@
     }
   },
   "author": "Mikihiro Hayashi",
-  "license": "MIT",
-  "devDependencies": {
-    "jshint": "^2.6.0"
-  }
+  "license": "MIT"
 }
