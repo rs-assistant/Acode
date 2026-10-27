@@ -29,7 +29,6 @@ import androidx.core.content.ContextCompat;
 import android.app.Activity;
 import com.foxdebug.acode.rk.exec.terminal.*;
 
-import java.net.ServerSocket;
 
 
 
@@ -43,6 +42,10 @@ public class Executor extends CordovaPlugin {
     private final Messenger handlerMessenger = new Messenger(new IncomingHandler());
     private CountDownLatch serviceConnectedLatch;
     private final java.util.Map<String, CallbackContext> callbackContextMap = new java.util.concurrent.ConcurrentHashMap<>();
+    private final Object streamLock = new Object();
+    private final java.util.Set<ProcessServer> streamServers = new java.util.HashSet<>();
+    private long streamEpoch;
+    private boolean streamDestroyed;
 
     private static final int REQUEST_POST_NOTIFICATIONS = 1001;
     
@@ -277,18 +280,11 @@ public class Executor extends CordovaPlugin {
                     cmd[i] = cmdArr.getString(i);
                 }
 
-                int port;
-                try (ServerSocket socket = new ServerSocket(0)) {
-                    port = socket.getLocalPort();
-                }
-
-                ProcessServer server = new ProcessServer(port, cmd);
-                server.startAndAwait(); // blocks until onStart() fires — server is listening before port is returned
-
-                callbackContext.success(port);
+                final long epoch;
+                synchronized (streamLock) { epoch = streamEpoch; }
+                cordova.getThreadPool().execute(() -> startStream(cmd, epoch, callbackContext));
             } catch (Exception e) {
-                e.printStackTrace();
-                callbackContext.error("Failed to spawn process: " + e.getMessage());
+                callbackContext.error("Could not create protected process stream");
             }
 
             return true;
@@ -373,6 +369,7 @@ public class Executor extends CordovaPlugin {
     }
 
     private void stopServiceNow() {
+        revokeStreams(false);
         if (isServiceBound) {
             try {
                 context.unbindService(serviceConnection);
@@ -508,8 +505,47 @@ public class Executor extends CordovaPlugin {
         callbackContextMap.remove(id);
     }
 
+    private void startStream(String[] cmd, long epoch, CallbackContext callback) {
+        ProcessServer server = null;
+        try {
+            synchronized (streamLock) {
+                if (streamDestroyed || streamEpoch != epoch || streamServers.size() >= 32)
+                    throw new IllegalStateException("Process stream unavailable");
+                server = new ProcessServer(0, cmd, closed -> {
+                    synchronized (streamLock) { streamServers.remove(closed); }
+                });
+                streamServers.add(server);
+            }
+            server.startAndAwait();
+            synchronized (streamLock) {
+                if (streamDestroyed || streamEpoch != epoch) throw new IllegalStateException("Process stream revoked");
+                callback.success(new JSONObject().put("port", server.getPort()).put("token", server.getToken()));
+            }
+        } catch (Exception error) {
+            if (server != null) server.shutdown();
+            callback.error("Could not create protected process stream");
+        }
+    }
+
+    private void revokeStreams(boolean destroying) {
+        ProcessServer[] previous;
+        synchronized (streamLock) {
+            streamEpoch++;
+            streamDestroyed |= destroying;
+            previous = streamServers.toArray(new ProcessServer[0]);
+            streamServers.clear();
+        }
+        for (ProcessServer server : previous) server.shutdown();
+    }
+
+    @Override public void onReset() {
+        revokeStreams(false);
+        super.onReset();
+    }
+
     @Override
     public void onDestroy() {
+        revokeStreams(true);
         super.onDestroy();
     }
 }

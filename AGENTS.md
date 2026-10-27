@@ -34,6 +34,9 @@
   只允許公鑰與 opaque ID 進入 WebView；勿新增私鑰回傳／剪貼簿／明文 fallback。
 - `config.xml`、`res/android/`：Android 設定與資源的來源。
   `hooks/`：Cordova prepare 時套用到產生專案的自訂處理。
+- 終端 `spawnStream` 的 native 回傳為 `{port, token}`，禁止退回無憑證連線。
+  改動 ProcessServer 時跑 `bash tests/security/process-stream-audit/run.sh`
+  （JDK 21、curl、sha256sum、/bin/cat），另做 Android 編譯；迴圈測試不是實機。
 - `utils/`、`rspack.config.js`：設定、建置及開發工具。
 - `tests/`：Vitest 測試；`src/test/` 是裝置內測試環境，不能當作 Node 測試執行。
 - `npm audit` 不涵蓋全部內嵌 JS。HTTP plugin 的 `www/lodash.js` 是獨立

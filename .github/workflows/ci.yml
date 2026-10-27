@@ -31,6 +31,8 @@ jobs:
         run: bash tests/security/preferences-audit/run.sh
       - name: Run SSH key generation against real crypto libraries
         run: bash tests/security/keygen-audit/run.sh
+      - name: Run real-loopback process stream regressions
+        run: bash tests/security/process-stream-audit/run.sh
 
   spell-check:
     timeout-minutes: 5

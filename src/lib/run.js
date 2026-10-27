@@ -17,6 +17,7 @@ import $_markdown from "views/markdown.hbs";
 import config from "./config";
 import EditorFile from "./editorFile";
 import openFolder from "./openFolder";
+import previewRequestPath from "./previewRequestPath";
 import appSettings from "./settings";
 
 /**@type {Server} */
@@ -191,7 +192,11 @@ async function run(
 	 */
 	function handleRequest(req) {
 		const reqId = req.requestId;
-		let reqPath = req.path.substring(1);
+		let reqPath = previewRequestPath(req.path);
+		if (reqPath === null) {
+			error(reqId);
+			return;
+		}
 
 		if (!reqPath || reqPath.endsWith("/")) {
 			reqPath += "index.html";

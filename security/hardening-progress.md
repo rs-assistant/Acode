@@ -271,3 +271,25 @@ test binary without a new source/validation record and clear test instructions.
   up-to-date), preserving the inspected APK hash. A fresh clean-source 87-module
   query again returned zero; its source/timestamp/provider/controls are retained
   in [the machine-readable report](android-runtime-advisories-2026-10-27.json).
+
+## Stage 13: authenticated process sockets and preview/main-navigation guards
+
+- Reproduce the original tokenless process stream using its production source,
+  real Java-WebSocket and disposable cat on loopback. Require a fresh 256-bit
+  capability before upgrade/process creation, one owner, bounded startup/unused
+  expiry, native registry limits and reset/destroy/stopService revocation.
+- Keep the public JS spawnStream callback, reject legacy numeric descriptors,
+  remove raw command exception details, and handle binary buffer slices safely.
+  The exact native server passes 35 real-loopback assertions; Android lifecycle
+  wiring remains source/compile validation, not real Cordova instrumentation.
+- Reject preview traversal/ambiguous request paths before URI/filesystem work.
+  Remove unnecessary broad main-editor http(s) navigation entries, while retaining
+  external browser intents/network requests. Do not misreport the existing Cordova
+  launch-origin bridge policy as an arbitrary-origin bridge bypass.
+- Full suite 102 files / 967 tests and typecheck pass; prior 216 native assertions
+  pass as well. Android build/signature: 16 seconds, 16/62 tasks executed. Native
+  installed sources, packaged wrapper, SDK/config/backup settings inspected.
+- LAN preview binding awaits the user's functional preference; native preview
+  authorization/concurrency, symlinks and guest-browser policy remain open.
+  See [review and limits](local-network-boundaries.md). No device work or public
+  APK replacement; main and old downloads remain preserved. Production stays blocked.

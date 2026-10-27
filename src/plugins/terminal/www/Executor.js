@@ -21,16 +21,27 @@ class Executor {
    *   process is ready. Use `ws.send()` to write to stdin and `ws.onmessage` to read stdout.
    */
   spawnStream(cmd, callback, onError) {
-    exec((port) => {
-      const ws = new WebSocket(`ws://127.0.0.1:${port}`);
+    exec((endpoint) => {
+      if (!endpoint || !Number.isInteger(endpoint.port) || endpoint.port < 1 || endpoint.port > 65535 ||
+          typeof endpoint.token !== 'string' || !/^[0-9a-f]{64}$/.test(endpoint.token)) {
+        if (onError) onError(new Error('Protected process endpoint unavailable; update the app'));
+        return;
+      }
+      let ws;
+      try {
+        ws = new WebSocket(`ws://127.0.0.1:${endpoint.port}/${endpoint.token}`);
+      } catch (_) {
+        if (onError) onError(new Error('Could not open protected process stream'));
+        return;
+      }
       ws.binaryType = "arraybuffer";
 
       ws.onopen = () => {
         callback(ws);
       };
 
-      ws.onerror = (e) => {
-        if (onError) onError(e);
+      ws.onerror = () => {
+        if (onError) onError(new Error('Process stream connection failed'));
       };
 
     }, (err) => { if (onError) onError(err); }, "Executor", "spawn", [cmd]);
