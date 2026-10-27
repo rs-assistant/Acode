@@ -289,7 +289,24 @@ test binary without a new source/validation record and clear test instructions.
 - Full suite 102 files / 967 tests and typecheck pass; prior 216 native assertions
   pass as well. Android build/signature: 16 seconds, 16/62 tasks executed. Native
   installed sources, packaged wrapper, SDK/config/backup settings inspected.
-- LAN preview binding awaits the user's functional preference; native preview
-  authorization/concurrency, symlinks and guest-browser policy remain open.
+- LAN preview binding initially awaited the user's functional preference; the
+  following stage restricts it. Native preview authorization/concurrency, symlinks
+  and guest-browser policy remain open.
   See [review and limits](local-network-boundaries.md). No device work or public
   APK replacement; main and old downloads remain preserved. Production stays blocked.
+
+## Stage 14: user-selected loopback-only preview
+
+- User declined cross-device Wi-Fi preview. Restrict the production NanoHTTPD
+  constructor to `127.0.0.1`, without a configurable wildcard fallback. Retain
+  existing localhost preview URLs and custom external preview destinations.
+- New real NanoHTTPD socket harness passes 13 assertions, including local HTTP
+  and connection refusal on both active non-loopback IPv4 interfaces. Android/
+  Cordova adapters are explicit and request handling returns dummy text; native
+  file/bridge behavior and real tablet Wi-Fi are not tested by it. Wire it into CI.
+- Full JS: 102 files / 968 tests; typecheck and targeted checks pass. Reinstall
+  the local server plugin, verify generated Java matches source, and rebuild/sign
+  Android: 16 seconds, 7/62 tasks executed, SDK 26/36/36, prior Debug signer.
+- No public APK replacement, main update or device testing. Same-device client
+  authorization and native preview response-map/concurrency/lifecycle remain open.
+  See [current findings and artifact hash](local-network-boundaries.md).

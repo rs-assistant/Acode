@@ -33,6 +33,8 @@ jobs:
         run: bash tests/security/keygen-audit/run.sh
       - name: Run real-loopback process stream regressions
         run: bash tests/security/process-stream-audit/run.sh
+      - name: Verify private preview listener binding with real NanoHTTPD
+        run: bash tests/security/preview-bind-audit/run.sh
 
   spell-check:
     timeout-minutes: 5

@@ -9,7 +9,7 @@ This branch is **not approved for production SSH credentials**.
 3. An application-level JavaScript token cannot establish a trustworthy native caller identity if plugins share the same realm.
 4. Native/JS regressions and packaged manifest/extraction inspection passed locally; Android adversarial/upgrade tests are still outstanding. A stub harness is not the real Cordova runtime.
 5. [Current npm and selected Maven scans](native-and-vendored-audit.md) report zero npm findings and zero affected modules in the 87-coordinate GitHub-reviewed Maven query after fixes. OSV/NVD cross-checks, complete embedded-library inventory and tablet compatibility remain unverified; no comprehensive dependency-security approval is claimed.
-6. [Local service review](local-network-boundaries.md) fixes the unauthenticated process stream and adds preview path/main-navigation guards. Preview LAN authorization/binding, concurrency and broader guest-browser/symlink checks remain open; real-loopback JVM tests are not Android lifecycle acceptance.
+6. [Local service review](local-network-boundaries.md) fixes the unauthenticated process stream, adds preview path/main-navigation guards, and restricts the preview listener to loopback per user choice. Same-device preview authorization, concurrency and broader guest-browser/symlink checks remain open; real-loopback JVM tests are not Android lifecycle acceptance.
 
 ## Unblock only after
 

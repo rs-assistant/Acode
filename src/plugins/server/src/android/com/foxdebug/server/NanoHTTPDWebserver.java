@@ -28,7 +28,8 @@ public class NanoHTTPDWebserver extends NanoHTTPD {
   Context context;
 
   public NanoHTTPDWebserver(int port, Context context) {
-    super(port);
+    // This private preview is intentionally unavailable to other LAN devices.
+    super("127.0.0.1", port);
     this.context = context;
     this.responses = new HashMap<String, Object>();
   }

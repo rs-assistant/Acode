@@ -73,7 +73,7 @@ demonstrated arbitrary-website-to-native-bridge bypass. The change reduces
 unnecessary main-editor navigation exposure; it does not prove every iframe,
 guest browser, content-provider or XSS path is isolated.
 
-## Validation and pending choices
+## Validation of the initial stream/path changes (`ff7cd410`)
 
 - Full Vitest: 102 files / 967 tests passed; typecheck, targeted Biome, shell
   syntax, diff checks and CI YAML parsing passed. This includes the actual URI
@@ -89,13 +89,48 @@ guest browser, content-provider or XSS path is isolated.
 - Local APK SHA-256:
   `2d288d947d7aa607057d6ed13eeba399b48a0dfc241277ba89a94a0b509a1aef`,
   49,405,356 bytes. No new tablet download was published.
-- The preview HTTP server still binds all interfaces. A user preference question
-  asks whether LAN preview is required; no restrictive bind change is made before
-  resolving that functional tradeoff. This remains an open exposure, not a fixed
-  item. Preview authorization/concurrency, symlinks and separate browser policies
-  need further work; cleartext remains unchanged for current localhost workflows.
+- At this initial stage the preview HTTP server still bound all interfaces,
+  pending the user's LAN preference. The follow-up below resolves that binding
+  choice, not the other authorization/concurrency findings.
 - Remote CI remains unverified; the real-network harness is wired into the
   native regression job but source configuration is not a successful remote run.
+
+## Follow-up: user-selected private preview
+
+The user confirmed that other Wi-Fi devices do not need preview access. The
+production `NanoHTTPDWebserver` now uses `super("127.0.0.1", port)` rather than
+the wildcard constructor. There is no JS host option or fallback that broadens
+the bind. All instances of this plugin, including the console server, use this
+constructor. Existing local `http://localhost` preview URLs stay unchanged;
+explicit custom external preview destinations are also unchanged. No LAN URL
+advertisement was found in the current plugin/preview path.
+
+This closes direct listening on LAN interfaces. It does not authenticate clients
+on the same device, prevent browser-based loopback requests, or fix the native
+preview busy-wait, response-map leak, concurrency, symlink or guest-browser issues.
+Those remain open; no new preview capability or lifecycle policy is claimed.
+
+Follow-up validation on 2026-10-27:
+
+- Full Vitest: 102 files / 968 tests passed, including 37 boundary regressions.
+  Typecheck, targeted Biome, shell syntax and CI YAML parsing passed. Diff checks
+  honor CRLF (`core.whitespace=cr-at-eol`) in the existing native source.
+- New [real NanoHTTPD binding harness](../tests/security/preview-bind-audit/README.md):
+  13 assertions passed. It compiles the complete production source with explicit
+  Android/Cordova adapters, uses its real constructor/listener, and overrides only
+  request handling to return dummy text. Actual socket address and IPv4/localhost
+  HTTP passed; both active non-loopback IPv4 interfaces refused connections.
+  This is not Android Wi-Fi or real file/bridge validation. CI is configured to
+  run it; a remote successful run is still unverified.
+- Removed/re-added the local server plugin with `--nosave`; source, installed
+  plugin and generated Android Java hashes match. Android rebuild and signature
+  passed in 16 seconds (62 tasks: 7 executed, 55 up-to-date). Min/target/compile
+  SDK remain 26/36/36, with the same Debug certificate.
+- New local APK SHA-256:
+  `9431b96e1e059b248a7a63d0f798bc9801e5f9dced99993425c5441d96796af3`,
+  49,405,356 bytes. No public APK replacement and no device/emulator testing.
+  Prior scan/native-suite results above are historical; this binding-only change
+  did not rerun those dependency, crypto or storage harnesses.
 
 The [production release gate](SSH_PRODUCTION_RELEASE_BLOCKED.md) remains blocked.
 Source and stub/socket tests are not Android acceptance or complete security proof.

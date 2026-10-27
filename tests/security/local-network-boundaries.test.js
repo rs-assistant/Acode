@@ -128,6 +128,17 @@ describe("native process endpoint JS wrapper", () => {
 });
 
 describe("main WebView navigation configuration", () => {
+	it("keeps the built-in preview private without changing custom external preview hosts", () => {
+		const native = readFileSync(
+			"src/plugins/server/src/android/com/foxdebug/server/NanoHTTPDWebserver.java",
+			"utf8",
+		);
+		expect(native).toContain('super("127.0.0.1", port);');
+		expect(native).not.toContain("super(port);");
+		const source = readFileSync("src/lib/run.js", "utf8");
+		expect(source).toContain("http://localhost:${port}/${filename}");
+		expect(source).toContain("http://${host}:${previewPort}");
+	});
 	it("does not permit arbitrary websites as editor navigations; keeps network requests/external browsing", () => {
 		const source = readFileSync("config.xml", "utf8");
 		expect(source).not.toMatch(
