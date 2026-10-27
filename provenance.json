@@ -1,0 +1,48 @@
+{
+  "record_type": "local-build-verification-not-signed-attestation",
+  "verification_completed_at_utc": "2026-10-27T09:26:31Z",
+  "repository": "rs-assistant/Acode",
+  "source_branch": "security/ssh-native-hardening",
+  "source_commit": "fbc734a5c440856c95e8ff91846c527a4567efcd",
+  "source_worktree_clean_at_build": true,
+  "submodules": {
+    "codemirror-lsp-client": "db6930c2b6db67e14978f08ae8f5aeb149d29468"
+  },
+  "artifact": {
+    "branch": "test/ssh-safe-apk-20261027",
+    "filename": "acode-ssh-safe-fbc734a5-debug.apk",
+    "size_bytes": 49405356,
+    "sha256": "9431b96e1e059b248a7a63d0f798bc9801e5f9dced99993425c5441d96796af3",
+    "package_id": "com.foxdebug.acode",
+    "version_name": "1.13.5",
+    "version_code": 1011,
+    "variant": "paid-debug",
+    "min_sdk": 26,
+    "target_sdk": 36,
+    "compile_sdk": 36,
+    "signing_certificate_sha256": "c6a811233830332c03851f95b3487faa7e4bde3b93f854b9cf4d8cb2a7969351"
+  },
+  "local_validation": {
+    "last_build": "2026-10-27; BUILD SUCCESSFUL in 16s; 62 tasks up-to-date",
+    "vitest_files_passed": 103,
+    "vitest_tests_passed": 978,
+    "typecheck": "passed",
+    "process_stream_real_loopback_assertions": 35,
+    "preview_binding_assertions": 13,
+    "non_loopback_interfaces_rejected": 2,
+    "archive_and_build_output_sha256_match": true,
+    "signature_and_zip_alignment": "verified",
+    "native_preview_and_terminal_sources_match_generated_copies": true,
+    "prior_tablet_apk_signer_match": true,
+    "device_or_emulator_tested_for_this_source": false,
+    "upgrade_compatibility": "not device tested; signer/package/version match is not complete acceptance"
+  },
+  "secrets_api_used_for_delivery": false,
+  "private_signing_key_or_tokens_in_artifact_branch": false,
+  "ssh_production_release_gate": "BLOCKED",
+  "remaining_limits": [
+    "Native preview same-device authorization, response-map/concurrency/lifecycle and symlink boundaries remain open.",
+    "Actual Android upgrade, Keystore, plugin enforcement and adversarial acceptance are not established by local tests.",
+    "Debug signing is not a production release key; metadata is not a signed supply-chain attestation."
+  ]
+}
