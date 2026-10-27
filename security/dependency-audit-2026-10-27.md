@@ -86,6 +86,10 @@ edits or an unsafe buildhelper downgrade.
   main.js match build inputs byte-for-byte. Local APK SHA-256:
   `47af922995e6fd3d121a2fd39352fd777513b1fe900bf6b8122b196b2a9bbcd9`
   (45,843,240 bytes). This APK has not been published to a tablet download branch.
+  Rebuild from clean committed runtime source
+  `0c37fdf0cf955da2d9dbc6797796e0ce78eb60da` passed/signature verified in 10 seconds
+  (all 62 tasks up-to-date) and retained that exact APK hash. A private workspace
+  artifact copy is archived; previous public download branches are untouched.
 - Chromium blank-page attempt timed out after 15 seconds (exit 124) in this
   restricted container. No browser or Android WebView visual success is claimed.
   Math fonts/layout, diagrams and HTTP cookies need tablet acceptance.

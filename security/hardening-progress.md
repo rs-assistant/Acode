@@ -223,3 +223,6 @@ test binary without a new source/validation record and clear test instructions.
 - Details: [October 27 follow-up](dependency-audit-2026-10-27.md). Previous APK
   downloads and main are preserved; no replacement APK published at this stage.
   Production credential approval remains BLOCKED; tablet visuals are pending.
+- Clean runtime source `0c37fdf0` rebuilt/signed in 10 seconds (62 up-to-date),
+  retaining the inspected APK hash; updated bundled Lodash, license and main.js
+  verified in the package. Source is published on the security branch, not main.
