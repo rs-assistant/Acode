@@ -245,3 +245,25 @@ test binary without a new source/validation record and clear test instructions.
   previously archived local dependency-update build; this migration is dev-only.
 - Main and existing tablet downloads remain untouched; no new APK published.
   Production SSH approval remains BLOCKED pending the broader acceptance work.
+
+## Stage 12: non-device native and embedded-cookie review
+
+- Inventory 87 selected Android runtime Maven coordinates with a read-only Gradle
+  init task, then query paginated reviewed GitHub advisories with positive/negative
+  version-filter controls. OSV is blocked by the environment proxy; do not claim
+  all-source CVE coverage. Parse/API errors fail instead of producing a clean scan.
+- Find BC 1.83 package/range matches and migrate the official provider/pkix/util
+  set to 1.86. The 1.85 trial passed JVM tests but failed Android's duplicate-class
+  check; retain a new base-class overlap guard, not edited crypto JARs. Final
+  1.86 graph has zero affected modules in this 87-coordinate provider query.
+- Replace embedded tough-cookie 3.0.0 with reproducibly bundled 4.1.4, complete
+  notices and a compatible browser/custom-store adapter. Reproduce the old memory
+  store's prototype mutation in a VM; test the real new bundle/handler behavior.
+  Add CI rebuild comparison (local only verified), pin already-selected NanoHTTPD
+  and Commons IO versions, preserve SSH strict credential storage unchanged.
+- Full JS: 101 files / 931 tests; typecheck and 216 native assertions pass. npm
+  scans both zero. Final Android build/signature and packaged source/license,
+  SDK, backup/extraction checks pass; no device testing or new public APK.
+- See [findings, failures, controls and remaining limits](native-and-vendored-audit.md).
+  Main/previous artifacts and CodeMirror submodule are preserved; production gate
+  stays BLOCKED. Remote CI, additional advisory coverage and device work are open.

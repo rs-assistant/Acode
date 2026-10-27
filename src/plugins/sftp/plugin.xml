@@ -25,9 +25,9 @@
         <source-file src="src/com/foxdebug/sftp/SshIdentityStore.java" target-dir="src/com/foxdebug/sftp" />
     </platform>
 
-    <framework src="commons-io:commons-io:2.11.0" />
+    <framework src="commons-io:commons-io:2.20.0" />
     <framework src="com.sshtools:maverick-synergy-client:3.1.4" />
 <!--    <framework src="com.sshtools:maverick-bc:3.1.2" />-->
-    <framework src="org.bouncycastle:bcprov-jdk15to18:1.83" />
-    <framework src="org.bouncycastle:bcpkix-jdk15to18:1.83" />
+    <framework src="org.bouncycastle:bcprov-jdk15to18:1.86" />
+    <framework src="org.bouncycastle:bcpkix-jdk15to18:1.86" />
 </plugin>

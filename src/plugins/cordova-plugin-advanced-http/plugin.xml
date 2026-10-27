@@ -22,6 +22,7 @@
   <js-module src="www/ponyfills.js" name="ponyfills"/>
   <js-module src="www/public-interface.js" name="public-interface"/>
   <js-module src="www/umd-tough-cookie.js" name="tough-cookie"/>
+  <asset src="www/tough-cookie.LICENSE" target="licenses/cordova-http-tough-cookie.LICENSE"/>
   <js-module src="www/url-util.js" name="url-util"/>
   <js-module src="www/advanced-http.js" name="http">
     <clobbers target="cordova.plugin.http"/>

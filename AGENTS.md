@@ -40,6 +40,10 @@
   vendored 程式，更新時保留授權資產並跑 `tests/security/vendored-http-lodash.test.js`。
   KaTeX 0.18.10 exact pin 與 Mermaid `$katex` override 刻意避開上游誤發的
   0.18.11；改版前讀 `security/dependency-audit-2026-10-27.md`。
+- HTTP cookie bundle 由 `npm run build:http-cookie` 從鎖定套件生成；不要手改
+  `umd-tough-cookie.js`。保留完整授權資產，跑 `tests/security/http-cookie-bundle.test.js`。
+  Maven 稽核用 `utils/security/audit-android-dependencies.mjs`，須確認命令退出值、
+  complete/source/timestamp 與資料源範圍，不能僅憑既有 JSON 檔宣稱本次掃描成功。
 - `codemirror-lsp-client/`：Git submodule，也是本機 `file:` dependency。
   不把 submodule 的修改混入無關工作。
   Root 的 devDependency `@codemirror/buildhelper` 與 testtool→Mocha override

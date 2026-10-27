@@ -31,23 +31,31 @@
 'use strict';
 
 module.exports = function init(ToughCookie, _) {
-  function WebStorageCookieStore(storage, storeKey) {
-    ToughCookie.Store.call(this);
-    this._storage = storage;
-    this._storeKey = storeKey || '__cookieStore__';
-    this.synchronous = true;
+  class WebStorageCookieStore extends ToughCookie.Store {
+    constructor(storage, storeKey) {
+      super();
+      this._storage = storage;
+      this._storeKey = storeKey || '__cookieStore__';
+      this.synchronous = true;
+    }
   }
-
-  WebStorageCookieStore.prototype = Object.create(ToughCookie.Store);
 
   WebStorageCookieStore.prototype.findCookie = function (domain, path, key, callback) {
     var store = this._readStore();
-    var cookie = _.get(store, [domain, path, key], null);
+    var owns = Object.prototype.hasOwnProperty;
+    var domainStore = owns.call(store, domain) ? store[domain] : null;
+    var pathStore = domainStore && owns.call(domainStore, path) ? domainStore[path] : null;
+    var cookie = pathStore && owns.call(pathStore, key) ? pathStore[key] : null;
 
     callback(null, ToughCookie.Cookie.fromJSON(cookie));
   };
 
-  WebStorageCookieStore.prototype.findCookies = function (domain, path, callback) {
+  WebStorageCookieStore.prototype.findCookies = function (domain, path, allowSpecialUseDomain, callback) {
+    // Preserve callers of the old three-argument adapter API as well.
+    if (typeof allowSpecialUseDomain === 'function') {
+      callback = allowSpecialUseDomain;
+      allowSpecialUseDomain = true;
+    }
     if (!domain) {
       callback(null, []);
       return;
@@ -56,10 +64,10 @@ module.exports = function init(ToughCookie, _) {
     var that = this;
     var cookies = [];
     var store = this._readStore();
-    var domains = ToughCookie.permuteDomain(domain) || [domain];
+    var domains = ToughCookie.permuteDomain(domain, allowSpecialUseDomain) || [domain];
 
     domains.forEach(function (domain) {
-      if (!store[domain]) {
+      if (!Object.prototype.hasOwnProperty.call(store, domain)) {
         return;
       }
 
@@ -166,11 +174,17 @@ module.exports = function init(ToughCookie, _) {
 
     if (json !== null) {
       try {
-        return JSON.parse(json);
+        var parsed = JSON.parse(json);
+        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) return parsed;
       } catch (e) { }
     }
 
     return {};
+  };
+
+  WebStorageCookieStore.prototype.removeAllCookies = function (callback) {
+    this._writeStore({});
+    callback(null);
   };
 
   WebStorageCookieStore.prototype._writeStore = function (store) {

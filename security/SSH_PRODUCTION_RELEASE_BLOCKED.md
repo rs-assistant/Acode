@@ -8,7 +8,7 @@ This branch is **not approved for production SSH credentials**.
 2. The actual loader was traced: third-party plugins execute in the main WebView with Cordova access. The accepted [SSH-safe edition](ssh-safe-mode.md) now blocks their execution before script loading, including themes and cached developer tools. Device/upgrade enforcement is not yet validated.
 3. An application-level JavaScript token cannot establish a trustworthy native caller identity if plugins share the same realm.
 4. Native/JS regressions and packaged manifest/extraction inspection passed locally; Android adversarial/upgrade tests are still outstanding. A stub harness is not the real Cordova runtime.
-5. [Current scans](codemirror-toolchain-migration.md) report zero npm findings both with and without development dependencies. This closes the known npm chain, not the incomplete embedded-library/Maven inventory or tablet compatibility work; no comprehensive dependency-security approval is claimed.
+5. [Current npm and selected Maven scans](native-and-vendored-audit.md) report zero npm findings and zero affected modules in the 87-coordinate GitHub-reviewed Maven query after fixes. OSV/NVD cross-checks, complete embedded-library inventory and tablet compatibility remain unverified; no comprehensive dependency-security approval is claimed.
 
 ## Unblock only after
 
@@ -19,7 +19,9 @@ This branch is **not approved for production SSH credentials**.
       saved-identity SFTP/shell login, deletion/restart and old-profile compatibility
       on Android; actual-library JVM crypto tests do not close this requirement.
 - [x] Inspect built APK backup/data extraction and network flags. Cleartext remains enabled for existing localhost preview/terminal compatibility; a network-policy redesign is not claimed.
-- [x] Rerun local npm dependency scans and document remaining findings (not clean).
+- [x] Rerun local npm full/omit-dev scans and document current zero results and scope.
+- [x] Inventory selected Android runtime Maven components, query reviewed GitHub advisories with controls, and validate native crypto/embedded-cookie fixes locally.
+- [ ] Cross-check additional advisory sources and complete the broader embedded/binary dependency inventory.
 - [ ] Run remote CI and outstanding Android emulator/device security tests.
 - [ ] Review the patch and document residual risks.
 

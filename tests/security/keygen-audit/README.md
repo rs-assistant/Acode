@@ -10,6 +10,9 @@ The script downloads the pinned project-version Maverick/BC dependencies and
 org.json over verified HTTPS from Maven Central, checking each SHA-256. Cache and
 compiled classes stay in task-specific temporary directories, not the source tree.
 It compiles the actual `SshKeyMaterial.java` and `SshIdentityStore.java` unchanged.
+Current pinned BC artifacts are 1.86. A base-class overlap guard also rejects
+duplicate dependency classes: official BC 1.85 jars passed JVM tests but failed
+Android packaging, so JVM success alone must not be used as that release check.
 
 The tests generate disposable Ed25519/RSA-4096 keys, parse them through the actual
 SSH library and verify signatures. Only temporary **public** files are handed to

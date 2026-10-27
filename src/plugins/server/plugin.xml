@@ -13,7 +13,7 @@
   </js-module>
 
   <platform name="android">
-    <framework src="org.nanohttpd:nanohttpd:+" />
+    <framework src="org.nanohttpd:nanohttpd:2.3.1" />
     <framework src="androidx.documentfile:documentfile:1.0.1" />
     <source-file src="src/android/com/foxdebug/server/Server.java" target-dir="src/com/foxdebug/server"/>
     <source-file src="src/android/com/foxdebug/server/NanoHTTPDWebserver.java" target-dir="src/com/foxdebug/server"/>
