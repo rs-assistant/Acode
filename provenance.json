@@ -1,0 +1,19 @@
+{
+  "repository": "rs-assistant/Acode",
+  "source_commit": "8d99d3b54213a02b62d3f71e5d9ef6c4e32b3427",
+  "runtime_commit": "ffde27043ea8fd862ebe273a2ce23f7fed10cec7",
+  "source_branch": "security/ssh-native-hardening",
+  "artifact_branch": "test/preview-apk-20261028",
+  "apk": "acode-preview-8d99d3b5-debug.apk",
+  "bytes": 49405784,
+  "sha256": "ce34978239e6a77c0d1466076ccc424ff3ccf06be950800bc9930d2ce0bb91e6",
+  "certificate_sha256": "c6a811233830332c03851f95b3487faa7e4bde3b93f854b9cf4d8cb2a7969351",
+  "application_id": "com.foxdebug.acode",
+  "version_name": "1.13.5",
+  "version_code": 1011,
+  "build_type": "debug",
+  "minimum_sdk": 26,
+  "target_sdk": 36,
+  "android_device_tested": false,
+  "distribution": "Test only; production security acceptance remains incomplete."
+}
