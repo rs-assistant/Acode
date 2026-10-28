@@ -94,9 +94,9 @@ Validation resumed on 2026-10-28 after the previous environment disconnected:
   The HTTP suite uses the actual handler with real NanoHTTPD sockets and a dummy
   Cordova text responder, not an overridden network handler. Only the separate
   binding suite overrides serving. Its two non-loopback interfaces were refused.
-- The 35 real-loopback terminal-stream assertions passed again. Existing crypto,
-  storage-failure and Maven/npm advisory suites were not rerun for this preview
-  change; their historical results are not presented as new scans.
+- The 35 real-loopback terminal-stream assertions passed again. The local run
+  did not repeat existing crypto/storage-failure or Maven/npm advisory suites;
+  historical results are not presented as new local checks or advisory scans.
 - Regression tests found that NanoHTTPD 2.3.1 writes fixed-length HEAD bodies.
   The server now closes/replaces the payload stream for HEAD and disables HEAD
   gzip emission while keeping metadata. Both raw HEAD cases pass. Tests also
@@ -125,6 +125,17 @@ Validation resumed on 2026-10-28 after the previous environment disconnected:
   No new artifact branch, Release or device download replaces the known working
   fbc734a5 tablet build. Remote CI results must be checked for the eventual
   committed source rather than inferred from these local results.
+- Clean worktree source `ffde27043ea8fd862ebe273a2ce23f7fed10cec7` rebuilt and
+  verified successfully in 10 seconds (62/62 tasks up-to-date), retaining that
+  exact APK hash. Private archive:
+  `/workspace/acode-cloud/artifacts/acode-preview-ffde2704-debug.apk`.
+- [Remote CI for that exact source](https://github.com/rs-assistant/Acode/actions/runs/40627629861)
+  completed successfully: unit tests, native security regressions, formatting and
+  spelling all passed; translation was conditionally skipped. Status/job evidence
+  was read through the GitHub API, not by inventing remote assertion counts. The
+  native CI job includes its existing policy/storage/crypto suites as well as the
+  terminal and new preview harnesses. This is not the manual signing/upload
+  workflow, a new advisory inventory, browser rendering or Android acceptance.
 
 ## Remaining limits and device acceptance
 

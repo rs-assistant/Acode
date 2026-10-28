@@ -353,3 +353,7 @@ test binary without a new source/validation record and clear test instructions.
 - No new public APK, main change or Secrets API use. Tablet feedback applies to
   the preceding fbc734a5 build only. See [protocol, validation and remaining
   boundaries](preview-request-lifecycle.md); production gate stays blocked.
+- Runtime/source commit ffde2704 rebuilt from a clean worktree with the same
+  inspected local APK hash. Its remote CI completed successfully (unit, native,
+  formatting, spelling; translation skipped). The source and verification records
+  are pushed to the security branch; main and existing APK artifacts are untouched.
