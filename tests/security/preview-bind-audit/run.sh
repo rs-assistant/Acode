@@ -24,5 +24,11 @@ mapfile -t acode_preview_stubs < <(find "$acode_preview_fixture/stubs" -type f -
 javac -cp "$acode_preview_cp" -d "$acode_preview_classes" \
   "${acode_preview_stubs[@]}" \
   "$acode_repo/src/plugins/server/src/android/com/foxdebug/server/NanoHTTPDWebserver.java" \
-  "$acode_preview_fixture/PreviewBindAudit.java"
+  "$acode_repo/src/plugins/server/src/android/com/foxdebug/server/Server.java" \
+  "$acode_repo/src/plugins/browser/android/com/foxdebug/browser/Plugin.java" \
+  "$acode_preview_fixture/PreviewBindAudit.java" \
+  "$acode_preview_fixture/PreviewRuntimeAudit.java" \
+  "$acode_preview_fixture/BrowserCloseAudit.java"
 java -cp "$acode_preview_classes:$acode_preview_cp" PreviewBindAudit
+java -cp "$acode_preview_classes:$acode_preview_cp" com.foxdebug.server.PreviewRuntimeAudit
+java -cp "$acode_preview_classes:$acode_preview_cp" BrowserCloseAudit

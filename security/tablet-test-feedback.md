@@ -13,6 +13,15 @@ scope rather than interpreting a short acknowledgement as a full security audit.
   and SSH terminal, the user replied **「可以」**. Record this as positive basic
   functional feedback; no per-operation transcript, device model, Android version
   or independently observed Keystore evidence was provided.
+- On 2026-10-27, artifact branch `test/ssh-safe-apk-20261027`, source
+  `fbc734a5c440856c95e8ff91846c527a4567efcd`, APK SHA-256
+  `9431b96e1e059b248a7a63d0f798bc9801e5f9dced99993425c5441d96796af3`:
+  the user reported **「可以更新並開啟」**. Asked whether prior settings/SSH keys
+  remained and SFTP still connected, the user replied **「正常」**. This confirms
+  user-reported basic upgrade/startup/retention/SFTP behavior for that build only.
+  It predates the new preview-cookie/deadline/lifecycle changes, which have NOT
+  been installed or accepted on the tablet. It is not evidence of failed-write,
+  malicious-plugin, deletion/revocation or new browser-cookie acceptance.
 
 The user has not reported failed-commit/storage exhaustion tests, malicious
 normal/theme plugin execution-marker tests, changed-host-key refusal, or local

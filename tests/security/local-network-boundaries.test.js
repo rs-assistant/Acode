@@ -63,7 +63,7 @@ describe("preview request syntax before filesystem/URI operations", () => {
 		const error = vi.fn();
 		vm.runInNewContext(
 			`(function(req){${prefix} throw Error('reached filesystem phase');})({requestId:'dummy',path:'/../private'})`,
-			{ previewRequestPath, error },
+			{ previewRequestPath, error, current: () => true },
 		);
 		expect(error).toHaveBeenCalledWith("dummy");
 	});
@@ -136,7 +136,9 @@ describe("main WebView navigation configuration", () => {
 		expect(native).toContain('super("127.0.0.1", port);');
 		expect(native).not.toContain("super(port);");
 		const source = readFileSync("src/lib/run.js", "utf8");
-		expect(source).toContain("http://localhost:${port}/${filename}");
+		expect(source).toContain(
+			"previewServer.getUrl(`/${encodeURIComponent(filename)}`)",
+		);
 		expect(source).toContain("http://${host}:${previewPort}");
 	});
 	it("does not permit arbitrary websites as editor navigations; keeps network requests/external browsing", () => {

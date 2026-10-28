@@ -129,15 +129,22 @@ describe.each([
 	});
 
 	it("keeps comment behaviour from the host language", () => {
-		const inside = state.doc.toString().indexOf("@returns");
-		expect(state.languageDataAt("commentTokens", inside)).toEqual([
+		// Initial state parsing has a short wall-clock budget. Highlight helpers
+		// finish the mutable parse context but foldable reads the state's tree;
+		// commit that work rather than depending on machine load/test order.
+		expect(ensureSyntaxTree(state, state.doc.length, 5000)).not.toBeNull();
+		const parsedState = state.update({}).state;
+		const inside = parsedState.doc.toString().indexOf("@returns");
+		expect(parsedState.languageDataAt("commentTokens", inside)).toEqual([
 			{ line: "//", block: { open: "/*", close: "*/" } },
 		]);
-		expect(getIndentation(state, state.doc.line(4).from)).toBeNull();
-		const line = state.doc.line(2);
-		expect(foldable(state, line.from, line.to)).toEqual({
+		expect(
+			getIndentation(parsedState, parsedState.doc.line(4).from),
+		).toBeNull();
+		const line = parsedState.doc.line(2);
+		expect(foldable(parsedState, line.from, line.to)).toEqual({
 			from: line.from + 2,
-			to: state.doc.toString().indexOf("*/", line.from),
+			to: parsedState.doc.toString().indexOf("*/", line.from),
 		});
 	});
 });

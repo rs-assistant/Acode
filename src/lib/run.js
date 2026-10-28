@@ -22,6 +22,7 @@ import appSettings from "./settings";
 
 /**@type {Server} */
 let webServer;
+let previewEpoch = 0;
 
 // An open console may outlive the server instance that created it.
 const CONSOLE_THEME_STATE = "__acode_console_theme.json";
@@ -37,6 +38,7 @@ async function run(
 	target = appSettings.value.previewMode,
 	runFile = false,
 ) {
+	const epoch = ++previewEpoch;
 	/** @type {EditorFile} */
 	const activeFile = isConsole ? null : editorManager.activeFile;
 
@@ -83,6 +85,9 @@ async function run(
 	const CONSOLE_THEME_STYLE = uuid + "_console_theme.css";
 	const MARKDOWN_STYLE = uuid + "_md.css";
 	const queue = [];
+	let previewServer;
+	let bindAttempts = 0;
+	const current = () => !!previewServer && webServer === previewServer;
 
 	if (activeFile) {
 		filename = activeFile.filename;
@@ -170,17 +175,18 @@ async function run(
 	}
 
 	function startServer() {
+		if (epoch !== previewEpoch) return;
 		webServer?.stop();
-		webServer = CreateServer(port, openBrowser, onError);
-		webServer.setOnRequestHandler(handleRequest);
+		previewServer = CreateServer(port, openBrowser, onError);
+		webServer = previewServer;
+		previewServer.setOnRequestHandler(handleRequest);
 
 		function onError(err) {
-			if (err === "Server already running") {
-				openBrowser();
-			} else {
+			if (epoch !== previewEpoch) return;
+			if (err?.code === "PORT_IN_USE" && ++bindAttempts < 10 && port < 65535) {
 				++port;
 				start();
-			}
+			} else helpers.error(new Error("Unable to start local preview"));
 		}
 	}
 
@@ -191,6 +197,7 @@ async function run(
 	 * @param {string} req.path
 	 */
 	function handleRequest(req) {
+		if (!current()) return;
 		const reqId = req.requestId;
 		let reqPath = previewRequestPath(req.path);
 		if (reqPath === null) {
@@ -248,7 +255,7 @@ async function run(
 				break;
 
 			default:
-				sendByExt();
+				sendByExt().catch(() => error(reqId));
 				break;
 		}
 
@@ -274,6 +281,8 @@ async function run(
 					sendIco(ASSETS_DIRECTORY, reqId);
 					return;
 				}
+				error(reqId);
+				return;
 			}
 
 			if (activeFile.SAFMode === "single") {
@@ -403,7 +412,7 @@ async function run(
 	 * @param {string} id
 	 */
 	function error(id) {
-		webServer?.send(id, {
+		previewServer?.send(id, {
 			status: 404,
 			body: "File not found!",
 		});
@@ -475,7 +484,19 @@ async function run(
 	 * @returns
 	 */
 	async function sendFile(path, id) {
+		if (!current()) {
+			queue.length = 0;
+			return;
+		}
+		if (!previewServer.isRequestActive(id)) {
+			if (!isLoading) queue.shift()?.();
+			return;
+		}
 		if (isLoading) {
+			if (queue.length >= 8) {
+				previewServer.send(id, { status: 503, body: "Preview busy" });
+				return;
+			}
 			queue.push(() => {
 				sendFile(path, id);
 			});
@@ -483,50 +504,51 @@ async function run(
 		}
 
 		isLoading = true;
-		const protocol = Url.getProtocol(path);
-		const ext = Url.extname(path);
-		const mimetype = mimeType.lookup(ext);
-		if (/s?ftp:/.test(protocol)) {
-			const cacheFile = Url.join(
-				CACHE_STORAGE,
-				protocol.slice(0, -1) + path.hashCode(),
-			);
-			const fs = fsOperation(path);
-			try {
+		try {
+			const protocol = Url.getProtocol(path);
+			const ext = Url.extname(path);
+			const mimetype = mimeType.lookup(ext);
+			if (/s?ftp:/.test(protocol)) {
+				const cacheFile = Url.join(
+					CACHE_STORAGE,
+					protocol.slice(0, -1) + path.hashCode(),
+				);
+				const fs = fsOperation(path);
 				await fs.readFile(); // Because reading the remote file will create cache file
 				path = cacheFile;
-			} catch (err) {
-				error(id);
-				isLoading = false;
-				return;
+			} else if (protocol === "content:") {
+				path = await new Promise((resolve, reject) => {
+					sdcard.formatUri(path, resolve, reject);
+				});
+			} else if (!/^file:/.test(protocol)) {
+				const fileContent = await fsOperation(path).readFile();
+				if (!current() || !previewServer.isRequestActive(id)) return;
+				const tempFileName = path.hashCode();
+				const tempFile = Url.join(CACHE_STORAGE, tempFileName);
+				if (!(await fsOperation(tempFile).exists())) {
+					await fsOperation(CACHE_STORAGE).createFile(
+						tempFileName,
+						fileContent,
+					);
+				} else {
+					await fsOperation(tempFile).writeFile(fileContent);
+				}
+				path = tempFile;
 			}
-		} else if (protocol === "content:") {
-			path = await new Promise((resolve, reject) => {
-				sdcard.formatUri(path, resolve, reject);
+
+			if (!current() || !previewServer.isRequestActive(id)) return;
+			previewServer.send(id, {
+				status: 200,
+				path,
+				headers: { "Content-Type": mimetype },
 			});
-		} else if (!/^file:/.test(protocol)) {
-			const fileContent = await fsOperation(path).readFile();
-			const tempFileName = path.hashCode();
-			const tempFile = Url.join(CACHE_STORAGE, tempFileName);
-			if (!(await fsOperation(tempFile).exists())) {
-				await fsOperation(CACHE_STORAGE).createFile(tempFileName, fileContent);
-			} else {
-				await fsOperation(tempFile).writeFile(fileContent);
-			}
-			path = tempFile;
+		} catch {
+			error(id);
+		} finally {
+			isLoading = false;
+			if (current()) queue.shift()?.();
+			else queue.length = 0;
 		}
-
-		webServer?.send(id, {
-			status: 200,
-			path,
-			headers: {
-				"Content-Type": mimetype,
-			},
-		});
-
-		isLoading = false;
-		const action = queue.splice(-1, 1)[0];
-		if (typeof action === "function") action();
 	}
 
 	/**
@@ -538,19 +560,21 @@ async function run(
 	 * @returns
 	 */
 	async function sendFileContent(url, id, mime, processText) {
-		const fs = fsOperation(url);
-
-		if (!(await fs.exists())) {
+		if (!current() || !previewServer.isRequestActive(id)) return;
+		try {
+			const fs = fsOperation(url);
+			if (!(await fs.exists())) {
+				error(id);
+				return;
+			}
+			if (!current() || !previewServer.isRequestActive(id)) return;
+			let text = await fs.readFile(appSettings.value.defaultFileEncoding);
+			if (!current() || !previewServer.isRequestActive(id)) return;
+			text = processText ? processText(text) : text;
+			if (mime === MIMETYPE_HTML) sendHTML(text, id);
+			else sendText(text, id, mime);
+		} catch {
 			error(id);
-			return;
-		}
-
-		let text = await fs.readFile(appSettings.value.defaultFileEncoding);
-		text = processText ? processText(text) : text;
-		if (mime === MIMETYPE_HTML) {
-			sendHTML(text, id);
-		} else {
-			sendText(text, id, mime);
 		}
 	}
 
@@ -562,7 +586,8 @@ async function run(
 	 * @param {(txt: string) => string} processText
 	 */
 	function sendText(text, id, mimeType, processText) {
-		webServer?.send(id, {
+		if (!current()) return;
+		previewServer?.send(id, {
 			status: 200,
 			body: processText ? processText(text) : text,
 			headers: {
@@ -575,14 +600,21 @@ async function run(
 	 * Opens the preview in browser
 	 */
 	function openBrowser() {
-		console.count("openBrowser");
-		const src = `http://localhost:${port}/${filename}`;
+		if (!current()) {
+			previewServer?.stop();
+			return;
+		}
+		const src = previewServer.getUrl(`/${encodeURIComponent(filename)}`);
 		if (target === "browser") {
 			system.openInBrowser(src);
 			return;
 		}
 
-		browser.open(src, isConsole);
+		browser.open(src, isConsole, () => {
+			previewServer?.stop();
+			queue.length = 0;
+			if (current()) webServer = null;
+		});
 	}
 }
 

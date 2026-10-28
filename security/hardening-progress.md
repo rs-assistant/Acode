@@ -329,3 +329,27 @@ test binary without a new source/validation record and clear test instructions.
 - A workflow-only registration PR #1 is open, with all five checks passing. The
   existing security-branch CI for cc332b2c also reports success via API (logs are
   blocked by the proxy); these are not a completed run of the new manual build.
+
+## Stage 16: bounded and authenticated preview requests
+
+- Follow user approval to finish non-device preview work: replace unbounded
+  polling/retained responses with bounded futures, monotonic deadlines, worker/
+  pending/server limits and explicit stop/reset/destroy cleanup. Fence native
+  bridge operations to server instance IDs and frontend replies to their own run.
+- Require a one-use opening capability and separate HttpOnly session cookie;
+  gate Host/Origin/Fetch-Metadata before bridge/file work. Keep loopback binding,
+  normal relative/root asset paths and custom external preview destinations.
+  Read-only GET/HEAD preview; no legacy unauthenticated fallback.
+- Add bounded JS file queues with finally-based error recovery and native browser
+  close callbacks. External-browser close is not observable; idle expiry reclaims
+  that listener. Fix the real fixed-length HEAD/gzip body regression.
+- Bound dispatched ticket IDs as well as active futures, so HTTP timeout cannot
+  grow a paused WebView bridge queue. Drop queued expired JS messages without
+  reading files; native monotonic deadlines remain authoritative.
+- Resumed validation on 2026-10-28: 104 JS files / 1001 tests, typecheck and scoped
+  checks passed; 13 binding + 102 HTTP/registry + 11 browser callback assertions
+  and 35 terminal-stream assertions passed. Adapters are explicit, not Android
+  UI, file-provider, browser-cookie or full cancellation acceptance.
+- No new public APK, main change or Secrets API use. Tablet feedback applies to
+  the preceding fbc734a5 build only. See [protocol, validation and remaining
+  boundaries](preview-request-lifecycle.md); production gate stays blocked.

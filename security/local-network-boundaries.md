@@ -105,10 +105,15 @@ constructor. Existing local `http://localhost` preview URLs stay unchanged;
 explicit custom external preview destinations are also unchanged. No LAN URL
 advertisement was found in the current plugin/preview path.
 
-This closes direct listening on LAN interfaces. It does not authenticate clients
+At this binding-only stage, the change closed direct listening on LAN interfaces.
+It did not authenticate clients
 on the same device, prevent browser-based loopback requests, or fix the native
 preview busy-wait, response-map leak, concurrency, symlink or guest-browser issues.
 Those remain open; no new preview capability or lifecycle policy is claimed.
+
+The subsequent [preview request/lifecycle work](preview-request-lifecycle.md)
+addresses unauthenticated local requests, pending/worker bounds and explicit
+revocation. It does not retroactively change the following binding-only results.
 
 Follow-up validation on 2026-10-27:
 

@@ -7,9 +7,10 @@
 
 1. GitHub 要求 `workflow_dispatch` 的 workflow 先存在預設分支，才可手動觸發。
    此 fork 的預設分支是 `main`。目前修改先放在
-   `security/ssh-native-hardening`，**不代表已啟用**。
+   `security/ssh-native-hardening`；僅有分支上的檔案並不代表已啟用。
    已建立只含此 workflow 的[啟用 PR #1](https://github.com/rs-assistant/Acode/pull/1)，
-   尚未合併。審查後只將 `.github/workflows/manual-test-apk.yml` 納入 `main` 即可註冊，
+   使用者已在 2026-10-27 合併該 PR；GitHub API 已確認 workflow 為 active。
+   該 PR 只將 `.github/workflows/manual-test-apk.yml` 納入 `main` 以註冊，
    不必為了這一步把整條安全分支合併進去。若 fork 的 Actions 尚未啟用，
    也要先在 GitHub 的 Actions 分頁啟用。實際執行時一定選安全分支；選
    `main`、tag 或其他分支會跳過工作，不會建置舊版或任意 PR 程式碼。

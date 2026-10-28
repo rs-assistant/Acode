@@ -39,7 +39,11 @@
   （JDK 21、curl、sha256sum、/bin/cat），另做 Android 編譯；迴圈測試不是實機。
 - 內建預覽依使用者選擇只監聽 `127.0.0.1`，不要改回 wildcard／區網介面。
   改動 server plugin 後跑 `bash tests/security/preview-bind-audit/run.sh` 並編譯 Android。
-  此測試使用真實 NanoHTTPD socket，但不驗證 Android 檔案、授權或並行請求。
+  此測試以真實 NanoHTTPD HTTP／socket 驗證授權、逾時與原生 registry，
+  Activity／Cordova／檔案提供者仍是 adapter，不代表 Android UI 或檔案已驗證。
+  預覽的 `{port,id,token}` 與 instance-fenced bridge 是成套協定；禁止退回無憑證 URL。
+  開啟 URL 的一次性憑證不是 GitHub token，不得記錄或存放；限制與驗收見
+  `security/preview-request-lifecycle.md`。同 realm／同瀏覽器 profile 不是隔離邊界。
 - `utils/`、`rspack.config.js`：設定、建置及開發工具。
 - `tests/`：Vitest 測試；`src/test/` 是裝置內測試環境，不能當作 Node 測試執行。
 - `npm audit` 不涵蓋全部內嵌 JS。HTTP plugin 的 `www/lodash.js` 是獨立
